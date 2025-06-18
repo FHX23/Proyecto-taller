@@ -1,6 +1,6 @@
 import Attendance from "../entity/attendance.entity.js";
 import DeviceAssignment from "../entity/deviceAssignment.entity.js";
-import { AppDataSource } from "../config/configDb.js";
+import { AppDataSource } from "../config/config.Db.js";
 
 export async function markAttendanceService({ userId, deviceToken, latitude, longitude, ipAddress, date }) {
   try {
