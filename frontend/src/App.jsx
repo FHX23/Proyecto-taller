@@ -1,34 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Switch } from "@/components/ui/switch"
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [email, setEmail] = useState("")
+
+  const handleClearEmail = () => {
+    setEmail("") 
+  }
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <main className="min-h-screen bg-background text-foreground flex items-center justify-center">
+      <div className="w-full max-w-sm space-y-6 p-6 rounded-2xl border shadow-xl">
+        <h1 className="text-2xl font-bold text-center">Bienvenido</h1>
+
+        <div className="space-y-2">
+          <Label htmlFor="email">Correo electrónico</Label>
+          <Input
+            id="email"
+            type="email"
+            placeholder="ejemplo@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </div>
+
+        <div className="flex items-center justify-between">
+          <Label htmlFor="modoOscuro">Modo oscuro</Label>
+          <Switch id="modoOscuro" />
+        </div>
+
+        <Button className="w-full" onClick={handleClearEmail}>
+          Ingresar
+        </Button>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </main>
   )
 }
 
