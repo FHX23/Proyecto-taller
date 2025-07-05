@@ -12,29 +12,35 @@ export async function loginService(user) {
 
     const createErrorMessage = (dataInfo, message) => ({
       dataInfo,
-      message
+      message,
     });
 
     const userFound = await userRepository.findOne({
-      where: { email }
+      where: { email },
     });
 
     if (!userFound) {
-      return [null, createErrorMessage("email", "El correo electrónico es incorrecto")];
+      return [
+        null,
+        createErrorMessage("email", "El correo electrónico es incorrecto"),
+      ];
     }
 
     const isMatch = await comparePassword(password, userFound.password);
 
     if (!isMatch) {
-      return [null, createErrorMessage("password", "La contraseña es incorrecta")];
+      return [
+        null,
+        createErrorMessage("password", "La contraseña es incorrecta"),
+      ];
     }
 
     const payload = {
       id: userFound.id,
-      nombreCompleto: userFound.nombreCompleto,
+      fullName: userFound.fullName, 
       email: userFound.email,
       rut: userFound.rut,
-      rol: userFound.rol,
+      role: userFound.role, 
     };
 
     const accessToken = jwt.sign(payload, ACCESS_TOKEN_SECRET, {
@@ -48,45 +54,45 @@ export async function loginService(user) {
   }
 }
 
-
 export async function registerService(user) {
   try {
     const userRepository = AppDataSource.getRepository(User);
 
-    const { nombreCompleto, rut, email } = user;
+    const { fullName, rut, email, password, paymentType, isMinor, role } = user;
 
     const createErrorMessage = (dataInfo, message) => ({
       dataInfo,
-      message
+      message,
     });
 
     const existingEmailUser = await userRepository.findOne({
-      where: {
-        email,
-      },
+      where: { email },
     });
-    
-    if (existingEmailUser) return [null, createErrorMessage("email", "Correo electrónico en uso")];
+
+    if (existingEmailUser)
+      return [null, createErrorMessage("email", "Correo electrónico en uso")];
 
     const existingRutUser = await userRepository.findOne({
-      where: {
-        rut,
-      },
+      where: { rut },
     });
 
-    if (existingRutUser) return [null, createErrorMessage("rut", "Rut ya asociado a una cuenta")];
+    if (existingRutUser)
+      return [null, createErrorMessage("rut", "Rut ya asociado a una cuenta")];
 
     const newUser = userRepository.create({
-      nombreCompleto,
+      fullName,
       email,
       rut,
-      password: await encryptPassword(user.password),
-      rol: "usuario",
+      password: await encryptPassword(password),
+      role: role || "user", 
+      paymentType,
+      isMinor,
+      isActive: true,
     });
 
     await userRepository.save(newUser);
 
-    const { password, ...dataUser } = newUser;
+    const { password: _, ...dataUser } = newUser;
 
     return [dataUser, null];
   } catch (error) {

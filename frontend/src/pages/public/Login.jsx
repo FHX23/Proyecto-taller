@@ -79,7 +79,7 @@ const Login = () => {
             <div className="space-y-2 text-center">
               <h2 className="text-3xl font-bold">Iniciar Sesión</h2>
               <p className="text-gray-500 dark:text-gray-400">
-                Inicia sesión para comenzar a usar la aplicación E-Park.
+                Inicia sesión para comenzar a usar la aplicación ScanWork.
               </p>
             </div>
             <Form

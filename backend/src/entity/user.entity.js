@@ -10,7 +10,7 @@ const UserSchema = new EntitySchema({
       primary: true,
       generated: true,
     },
-    nombreCompleto: {
+    fullName: {
       type: "varchar",
       length: 255,
       nullable: false,
@@ -27,16 +27,18 @@ const UserSchema = new EntitySchema({
       nullable: true, 
       unique: true,
     },
-    rol: {
+    role: {
       type: "varchar",
       length: 50,
       nullable: false,
+      enum: ["administrador", "usuario"],
+      default: "usuario",
     },
     password: {
       type: "varchar",
       nullable: false,
     },
-    tipoPago: {
+    paymentType: {
       type: "varchar",
       length: 100,
       nullable: true,
