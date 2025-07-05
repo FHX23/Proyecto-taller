@@ -1,6 +1,6 @@
 "use strict";
 import User from "../entity/user.entity.js";
-import { AppDataSource } from "../config/config.Db.js"
+import { AppDataSource } from "../config/config.Db.js";
 import { comparePassword, encryptPassword } from "../helpers/bcrypt.helper.js";
 
 export async function getUserService(query) {
@@ -10,7 +10,7 @@ export async function getUserService(query) {
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: [{ id: id }, { rut: rut }, { email: email }],
+      where: [{ id }, { rut }, { email }],
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
@@ -48,13 +48,16 @@ export async function updateUserService(query, body) {
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: [{ id: id }, { rut: rut }, { email: email }],
+      where: [{ id }, { rut }, { email }],
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
 
     const existingUser = await userRepository.findOne({
-      where: [{ rut: body.rut }, { email: body.email }],
+      where: [
+        { rut: body.rut },
+        { email: body.email }
+      ],
     });
 
     if (existingUser && existingUser.id !== userFound.id) {
@@ -71,10 +74,13 @@ export async function updateUserService(query, body) {
     }
 
     const dataUserUpdate = {
-      nombreCompleto: body.nombreCompleto,
+      fullName: body.fullName,           
       rut: body.rut,
       email: body.email,
-      rol: body.rol,
+      role: body.role,
+      paymentType: body.paymentType,
+      isActive: body.isActive,
+      isMinor: body.isMinor,
       updatedAt: new Date(),
     };
 
@@ -108,12 +114,12 @@ export async function deleteUserService(query) {
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: [{ id: id }, { rut: rut }, { email: email }],
+      where: [{ id }, { rut }, { email }],
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
 
-    if (userFound.rol === "administrador") {
+    if (userFound.role === "administrador") {
       return [null, "No se puede eliminar un usuario con rol de administrador"];
     }
 

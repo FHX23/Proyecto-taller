@@ -19,9 +19,9 @@ try {
     );
     }
 
-    const rolUser = userFound.rol;
+    const roleUser = userFound.role;
 
-    if (rolUser !== "administrador") {
+    if (roleUser !== "administrador") {
         return handleErrorClient(
             res,
             403,
