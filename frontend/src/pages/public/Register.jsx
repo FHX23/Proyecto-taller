@@ -88,7 +88,7 @@ const Register = () => {
         <div className="flex justify-center items-center gap-2">
           <School className="h-8 w-8" />
           <Link to="/" className="text-xl font-bold">
-            MiLiceo
+            ScanWork
           </Link>
         </div>
       </header>
@@ -99,7 +99,7 @@ const Register = () => {
             <div className="space-y-2 text-center">
               <h2 className="text-3xl font-bold">Crear Cuenta</h2>
               <p className="text-gray-500 dark:text-gray-400">
-                Crea una cuenta para comenzar a usar la aplicación MiLiceo.
+                Crea una cuenta para comenzar a usar la aplicación Scanwork.
               </p>
             </div>
             <Form

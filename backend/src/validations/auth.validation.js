@@ -44,7 +44,7 @@ export const authValidation = Joi.object({
 
 // Validación para registro
 export const registerValidation = Joi.object({
-  nombreCompleto: Joi.string()
+  fullName: Joi.string()
     .min(15)
     .max(50)
     .pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
@@ -105,12 +105,18 @@ export const registerValidation = Joi.object({
       "string.pattern.base": "La contraseña solo puede contener letras y números.",
     }),
 
-  tipoPago: Joi.string()
+  paymentType: Joi.string()
     .valid("transferencia", "efectivo")
-    .required()
     .messages({
       "any.only": "El tipo de pago debe ser 'transferencia' o 'efectivo'.",
-      "any.required": "El tipo de pago es obligatorio.",
+    }),
+
+  role: Joi.string()
+    .valid("usuario", "administrador")
+    .required()
+    .messages({
+      "any.only": "El rol debe ser 'user' o 'admin'.",
+      "any.required": "El rol es obligatorio.",
     }),
 
   isMinor: Joi.boolean()

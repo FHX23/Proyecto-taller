@@ -3,7 +3,8 @@ import {
   handleErrorServer,
   handleSuccess,
 } from "../handlers/responseHandlers.js";
-import { markAttendanceService } from "../services/attendance.service.js"
+import { markAttendanceService } from "../services/attendance.service.js";
+
 export async function markAttendanceController(req, res) {
   try {
     const userId = req.user?.id; // from JWT or session

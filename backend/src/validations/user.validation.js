@@ -50,8 +50,9 @@ export const userQueryValidation = Joi.object({
     "object.missing": "Debes proporcionar al menos un parámetro: id, email o rut.",
   });
 
+
 export const userBodyValidation = Joi.object({
-  nombreCompleto: Joi.string()
+  fullName: Joi.string() 
     .min(15)
     .max(50)
     .pattern(/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/)
@@ -62,11 +63,12 @@ export const userBodyValidation = Joi.object({
       "string.max": "El nombre completo debe tener como máximo 50 caracteres.",
       "string.pattern.base": "El nombre completo solo puede contener letras y espacios.",
     }),
+
   email: Joi.string()
     .min(15)
     .max(35)
     .email()
-    .allow(null) // Permite null para borrar email
+    .allow(null)
     .messages({
       "string.empty": "El correo electrónico no puede estar vacío.",
       "string.base": "El correo electrónico debe ser de tipo string.",
@@ -75,17 +77,19 @@ export const userBodyValidation = Joi.object({
       "string.max": "El correo electrónico debe tener como máximo 35 caracteres.",
     })
     .custom(domainEmailValidator, "Validación dominio email"),
+
   password: Joi.string()
     .min(8)
     .max(26)
     .pattern(/^[a-zA-Z0-9]+$/)
     .messages({
       "string.empty": "La contraseña no puede estar vacía.",
-      "string.base": "La contraseña debe ser de tipo string.",
+      "string.base": "La contraseña debe ser de tipo texto.",
       "string.min": "La contraseña debe tener como mínimo 8 caracteres.",
       "string.max": "La contraseña debe tener como máximo 26 caracteres.",
       "string.pattern.base": "La contraseña solo puede contener letras y números.",
     }),
+
   newPassword: Joi.string()
     .min(8)
     .max(26)
@@ -93,11 +97,12 @@ export const userBodyValidation = Joi.object({
     .pattern(/^[a-zA-Z0-9]+$/)
     .messages({
       "string.empty": "La nueva contraseña no puede estar vacía.",
-      "string.base": "La nueva contraseña debe ser de tipo string.",
+      "string.base": "La nueva contraseña debe ser de tipo texto.",
       "string.min": "La nueva contraseña debe tener como mínimo 8 caracteres.",
       "string.max": "La nueva contraseña debe tener como máximo 26 caracteres.",
       "string.pattern.base": "La nueva contraseña solo puede contener letras y números.",
     }),
+
   rut: Joi.string()
     .min(9)
     .max(12)
@@ -109,7 +114,8 @@ export const userBodyValidation = Joi.object({
       "string.max": "El rut debe tener como máximo 12 caracteres.",
       "string.pattern.base": "Formato rut inválido, debe ser xx.xxx.xxx-x o xxxxxxxx-x.",
     }),
-  rol: Joi.string()
+
+  role: Joi.string() 
     .min(4)
     .max(15)
     .messages({
@@ -117,24 +123,26 @@ export const userBodyValidation = Joi.object({
       "string.min": "El rol debe tener como mínimo 4 caracteres.",
       "string.max": "El rol debe tener como máximo 15 caracteres.",
     }),
-  tipoPago: Joi.string()
+
+  paymentType: Joi.string() 
     .valid("transferencia", "efectivo")
     .messages({
       "any.only": "El tipo de pago debe ser 'transferencia' o 'efectivo'.",
     }),
+
   isActive: Joi.boolean()
     .messages({
       "boolean.base": "El campo 'activo' debe ser verdadero o falso.",
     }),
+
   isMinor: Joi.boolean()
     .messages({
       "boolean.base": "El campo 'menor de edad' debe ser verdadero o falso.",
     }),
 })
-  .or("nombreCompleto", "email", "password", "newPassword", "rut", "rol", "tipoPago", "isActive", "isMinor")
+  .or("fullName", "email", "password", "newPassword", "rut", "role", "paymentType", "isActive", "isMinor")
   .unknown(false)
   .messages({
     "object.unknown": "No se permiten propiedades adicionales.",
-    "object.missing":
-      "Debes proporcionar al menos un campo para actualizar.",
+    "object.missing": "Debes proporcionar al menos un campo para actualizar.",
   });
