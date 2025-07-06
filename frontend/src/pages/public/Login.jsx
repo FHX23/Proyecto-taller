@@ -1,64 +1,28 @@
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { login } from "@/services/auth.service.js";
 import useLogin from "@/hooks/auth/useLogin.jsx";
 import Footer from "@/components/layout/Footer";
-
-// --- TOAST DESACTIVADO ---
-// import { ToastAction } from "@/components/ui/toast";
-// import { useToast } from "@/hooks/use-toast";
-
 import { School } from "lucide-react";
 import Form from "@/components/layout/Form";
+import { toast } from "sonner"; 
 
 const Login = () => {
   const navigate = useNavigate();
-
-  // --- TOAST DESACTIVADO ---
-  // const { toast } = useToast();
-
-  const { errorEmail, errorPassword, errorData, handleInputChange } =
-    useLogin();
+  const { errorEmail, errorPassword, errorData, handleInputChange } = useLogin();
 
   const loginSubmit = async (data) => {
     try {
       const response = await login(data);
       if (response.status === "Success") {
-        // --- TOAST DESACTIVADO ---
-        // toast({
-        //   title: "Inicio de sesión exitoso",
-        //   description: "Has iniciado sesión exitosamente",
-        // });
-
+        toast.success("Inicio de sesión exitoso");
         navigate("/home");
       } else if (response.status === "Client error") {
         errorData(response.details);
-
-        // --- TOAST DESACTIVADO ---
-        // toast({
-        //   variant: "destructive",
-        //   title: "Error",
-        //   description: "Hubo un problema al iniciar sesión",
-        //   status: "error",
-        //   action: (
-        //     <ToastAction
-        //       altText="Crear Cuenta"
-        //       onClick={() => navigate("/register")}
-        //     >
-        //       Crear Cuenta
-        //     </ToastAction>
-        //   ),
-        // });
+        toast.error("Hubo un problema al iniciar sesión. Verifica tus datos.");
       }
     } catch (error) {
       console.log(error);
-
-      // --- TOAST DESACTIVADO ---
-      // toast({
-      //   variant: "destructive",
-      //   title: "Error del servidor",
-      //   description: "No se pudo conectar con el servidor, intenta más tarde.",
-      // });
+      toast.error("No se pudo conectar con el servidor. Intenta más tarde.");
     }
   };
 

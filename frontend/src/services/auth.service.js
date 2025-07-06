@@ -2,6 +2,7 @@ import axios from "./root.service.js";
 import cookies from "js-cookie";
 import { jwtDecode } from "jwt-decode";
 import { convertirMinusculas } from "@/helpers/formatData.js";
+import { getDeviceToken } from "@/utils/deviceToken";
 
 export async function login(dataUser) {
   try {
@@ -9,6 +10,7 @@ export async function login(dataUser) {
       email: dataUser.email,
       password: dataUser.password,
     });
+
     const { status, data } = response;
     if (status === 200) {
       const { nombreCompleto, email, rut, rol } = jwtDecode(data.data.token);
@@ -16,6 +18,10 @@ export async function login(dataUser) {
       sessionStorage.setItem("usuario", JSON.stringify(userData));
       axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
       cookies.set("jwt-auth", data.data.token, { path: "/" });
+
+      const deviceToken = await getDeviceToken();
+      await axios.post("/device/register", { deviceToken }); // el token JWT ya está en headers
+      
       return response.data;
     }
   } catch (error) {
@@ -26,13 +32,14 @@ export async function login(dataUser) {
 export async function register(data) {
   try {
     const dataRegister = convertirMinusculas(data);
-    const { nombreCompleto, email, rut, password } = dataRegister;
+    const { fullName, email, rut, password } = dataRegister;
     const response = await axios.post("/auth/register", {
-      nombreCompleto,
+      fullName,
       email,
       rut,
       password,
     });
+    
     return response.data;
   } catch (error) {
         // Lanzar solo el mensaje del error como string
