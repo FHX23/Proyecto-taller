@@ -2,7 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { login } from "@/services/auth.service.js";
 import useLogin from "@/hooks/auth/useLogin.jsx";
 import Footer from "@/components/layout/Footer";
-import { School } from "lucide-react";
+import { ScanQrCode } from "lucide-react";
 import Form from "@/components/layout/Form";
 import { toast } from "sonner"; 
 
@@ -30,16 +30,16 @@ const Login = () => {
     <div className="flex flex-col min-h-screen">
       <header className="flex items-center justify-center gap-2 p-8 lg:px-6">
         <div className="flex justify-center items-center gap-2">
-          <School className="h-8 w-8" />
+          <ScanQrCode className="h-8 w-8" />
           <Link to="/" className="text-xl font-bold">
-            MiLiceo
+            Scanwork
           </Link>
         </div>
       </header>
 
       <main className="flex-grow">
         <div className="flex min-h-full items-center justify-center p-8">
-          <div className="max-w-md w-full space-y-6 bg-gray-50 dark:bg-gray-800 p-8 rounded-lg">
+          <div className="max-w-md w-full space-y-6 bg-gray-50 dark:bg-gray-500 p-8 rounded-lg">
             <div className="space-y-2 text-center">
               <h2 className="text-3xl font-bold">Iniciar Sesión</h2>
               <p className="text-gray-500 dark:text-gray-400">
