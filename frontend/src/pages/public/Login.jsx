@@ -1,64 +1,28 @@
-import { Link } from "react-router-dom";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { login } from "@/services/auth.service.js";
 import useLogin from "@/hooks/auth/useLogin.jsx";
 import Footer from "@/components/layout/Footer";
-
-// --- TOAST DESACTIVADO ---
-// import { ToastAction } from "@/components/ui/toast";
-// import { useToast } from "@/hooks/use-toast";
-
-import { School } from "lucide-react";
+import { ScanQrCode } from "lucide-react";
 import Form from "@/components/layout/Form";
+import { toast } from "sonner"; 
 
 const Login = () => {
   const navigate = useNavigate();
-
-  // --- TOAST DESACTIVADO ---
-  // const { toast } = useToast();
-
-  const { errorEmail, errorPassword, errorData, handleInputChange } =
-    useLogin();
+  const { errorEmail, errorPassword, errorData, handleInputChange } = useLogin();
 
   const loginSubmit = async (data) => {
     try {
       const response = await login(data);
       if (response.status === "Success") {
-        // --- TOAST DESACTIVADO ---
-        // toast({
-        //   title: "Inicio de sesión exitoso",
-        //   description: "Has iniciado sesión exitosamente",
-        // });
-
+        toast.success("Inicio de sesión exitoso");
         navigate("/home");
       } else if (response.status === "Client error") {
         errorData(response.details);
-
-        // --- TOAST DESACTIVADO ---
-        // toast({
-        //   variant: "destructive",
-        //   title: "Error",
-        //   description: "Hubo un problema al iniciar sesión",
-        //   status: "error",
-        //   action: (
-        //     <ToastAction
-        //       altText="Crear Cuenta"
-        //       onClick={() => navigate("/register")}
-        //     >
-        //       Crear Cuenta
-        //     </ToastAction>
-        //   ),
-        // });
+        toast.error("Hubo un problema al iniciar sesión. Verifica tus datos.");
       }
     } catch (error) {
       console.log(error);
-
-      // --- TOAST DESACTIVADO ---
-      // toast({
-      //   variant: "destructive",
-      //   title: "Error del servidor",
-      //   description: "No se pudo conectar con el servidor, intenta más tarde.",
-      // });
+      toast.error("No se pudo conectar con el servidor. Intenta más tarde.");
     }
   };
 
@@ -66,16 +30,16 @@ const Login = () => {
     <div className="flex flex-col min-h-screen">
       <header className="flex items-center justify-center gap-2 p-8 lg:px-6">
         <div className="flex justify-center items-center gap-2">
-          <School className="h-8 w-8" />
+          <ScanQrCode className="h-8 w-8" />
           <Link to="/" className="text-xl font-bold">
-            MiLiceo
+            Scanwork
           </Link>
         </div>
       </header>
 
       <main className="flex-grow">
         <div className="flex min-h-full items-center justify-center p-8">
-          <div className="max-w-md w-full space-y-6 bg-gray-50 dark:bg-gray-800 p-8 rounded-lg">
+          <div className="max-w-md w-full space-y-6 bg-gray-50 dark:bg-gray-500 p-8 rounded-lg">
             <div className="space-y-2 text-center">
               <h2 className="text-3xl font-bold">Iniciar Sesión</h2>
               <p className="text-gray-500 dark:text-gray-400">

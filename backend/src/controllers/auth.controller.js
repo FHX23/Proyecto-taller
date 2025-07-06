@@ -21,8 +21,9 @@ export async function login(req, res) {
     }
     const [accessToken, errorToken] = await loginService(body);
 
-    if (errorToken) return handleErrorClient(res, 400, "Error iniciando sesión", errorToken);
-
+    if (errorToken) {
+      return handleErrorClient(res, 400, "Error iniciando sesión", errorToken);
+    }
     res.cookie("jwt", accessToken, {
       httpOnly: true,
       maxAge: 24 * 60 * 60 * 1000,
