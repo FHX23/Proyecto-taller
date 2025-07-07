@@ -22,17 +22,16 @@ const Register = () => {
         setTimeout(() => {
           navigate("/login");
         }, 1500);
-      } else if (response.status === "Client error") {
-        errorData(response.details);
-        toast.error("Hubo un problema al crear la cuenta", {
-          description: "Revisa los datos ingresados",
-        });
-      }
+      } 
     } catch (err) {
       console.error("Error al registrar un usuario: ", err);
-      toast.error("Error del servidor", {
-        description: "No se pudo crear la cuenta. Intenta más tarde.",
-      });
+
+        toast.custom(() => (
+  <div className="bg-gray-100 border border-gray-200 rounded-md p-4 shadow-sm max-w-md w-full text-gray-900">
+    <strong className="block mb-1">Hubo un problema al crear la cuenta</strong>
+    <p className="text-sm">{err}</p>
+  </div>
+));
     }
   };
 
@@ -61,7 +60,7 @@ const Register = () => {
               fields={[
                 {
                   label: "Nombre Completo",
-                  name: "nombreCompleto",
+                  name: "fullName",
                   placeholder: "Juan Roman",
                   type: "text",
                   required: true,

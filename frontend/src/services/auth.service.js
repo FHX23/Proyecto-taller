@@ -44,7 +44,7 @@ export async function register(data) {
     return response.data;
   } catch (error) {
         // Lanzar solo el mensaje del error como string
-        throw error.response?.data?.message || "Error al crear cuenta.";
+        throw error.response?.data?.details || "Error al crear cuenta.";
   }
 }
 
