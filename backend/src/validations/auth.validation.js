@@ -118,10 +118,8 @@ export const registerValidation = Joi.object({
     }),
 
   isMinor: Joi.boolean()
-    .required()
     .messages({
       "boolean.base": "El campo de menor de edad debe ser verdadero o falso.",
-      "any.required": "El campo de menor de edad es obligatorio.",
     }),
 }).unknown(false).messages({
   "object.unknown": "No se permiten propiedades adicionales.",

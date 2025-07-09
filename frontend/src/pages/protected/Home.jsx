@@ -14,7 +14,7 @@ const Home = () => {
         <div className="grid grid-cols-2 gap-4">
           <Button
             variant="outline"
-            onClick={() => navigate("/attendance")}
+            onClick={() => navigate("/table_attendance")}
             className="flex items-center justify-center space-x-2"
           >
             <Eye className="w-5 h-5" />

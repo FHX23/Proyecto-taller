@@ -19,7 +19,9 @@ const AttendanceSchema = new EntitySchema({
     },
     device_id: {
       type: "int",
-      nullable: false,
+      nullable: true,
+      //nullable: false, 
+      //! cambiar 
     },
     createdAt: {
       type: "timestamp with time zone",

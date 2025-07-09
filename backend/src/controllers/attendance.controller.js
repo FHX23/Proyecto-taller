@@ -4,6 +4,7 @@ import {
   handleSuccess,
 } from "../handlers/responseHandlers.js";
 import { markAttendanceService } from "../services/attendance.service.js";
+import { getUserAttendanceCounts } from "../services/attendance.service.js";
 
 export async function markAttendanceController(req, res) {
   try {
@@ -27,6 +28,16 @@ export async function markAttendanceController(req, res) {
     if (error) return handleErrorClient(res, 400, error);
 
     handleSuccess(res, 201, "Attendance recorded", result);
+  } catch (err) {
+    handleErrorServer(res, 500, err.message);
+  }
+}
+
+export async function getAttendanceSummaryController(req, res) {
+  try {
+    const [data, error] = await getUserAttendanceCounts();
+    if (error) return handleErrorServer(res, 500, error);
+    handleSuccess(res, 200, "Attendance summary retrieved", data);
   } catch (err) {
     handleErrorServer(res, 500, err.message);
   }

@@ -14,7 +14,7 @@ import ProtectedRoute from "./components/layout/ProtectedRoute";
 import Home from "./pages/protected/Home";
 import QRPage from "./pages/protected/Scanner";
 import QRDisplayPage from "./pages/protected/QRDisplayPage";
-
+import AttendancePage from "./pages/protected/TableAttendance";
 const AppRouter = () => {
   return (
     <Routes>
@@ -38,6 +38,7 @@ const AppRouter = () => {
         <Route path="/home" element={<Home />} />
         <Route path="/attendance" element={<QRPage />} />
         <Route path="/qr_display" element={<QRDisplayPage />} />
+        <Route path="/table_attendance" element={<AttendancePage />} />
         {/* Agrega más rutas protegidas aquí */}
         
       </Route>
