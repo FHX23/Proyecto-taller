@@ -59,6 +59,7 @@ function QRPage() {
       const code = jsQR(imageData.data, canvas.width, canvas.height);
 
 if (code) {
+  console.log("link escaneado",code.data);
   const scanned = code.data;
   setQrData(scanned);
   setScanning(false);
@@ -88,7 +89,7 @@ sendToService(scanned);
   try {
     const url = new URL(scannedUrl);
     const date = url.pathname.split("/").pop(); // Extrae "2025-07-09"
-
+    console("la fecha de hoy es",date);
     const payload = {
       deviceToken: "abcd1234",
       latitude: -36.826991,

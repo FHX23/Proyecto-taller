@@ -20,7 +20,7 @@ export async function obtenerResumenAsistencia() {
   }
 }
 
-export async function markAttendance(date, payload) {
+export async function markAttendance(date, { deviceToken, latitude, longitude }) {
   try {
     const token = cookies.get("token");
 
@@ -28,7 +28,11 @@ export async function markAttendance(date, payload) {
 
     const res = await axios.post(
       `/attendance/markAttendance/${date}`,
-      payload,
+      {
+        deviceToken,
+        latitude,
+        longitude,
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,
