@@ -62,7 +62,8 @@ if (code) {
   const scanned = code.data;
   setQrData(scanned);
   setScanning(false);
-
+sendToService(scanned);
+/*
   const validPrefixes = [
     "https://proyecto-taller-production.up.railway.app/api/attendance",
     "http://proyecto-taller-production.up.railway.app/api/attendance/markAttendance"
@@ -75,6 +76,7 @@ if (code) {
   } else {
     setError("Código QR no válido.");
   }
+    */
   return;
 }
     }
