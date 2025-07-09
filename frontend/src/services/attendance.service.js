@@ -19,3 +19,29 @@ export async function obtenerResumenAsistencia() {
     };
   }
 }
+
+export async function markAttendance(date, payload) {
+  try {
+    const token = cookies.get("token");
+
+    if (!token) throw new Error("No hay token de autenticación");
+
+    const res = await axios.post(
+      `/attendance/markAttendance/${date}`,
+      payload,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    return res.data;
+  } catch (error) {
+    return error.response?.data || {
+      status: "Error",
+      message: "Error desconocido",
+      data: null,
+    };
+  }
+}
