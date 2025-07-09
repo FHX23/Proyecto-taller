@@ -1,5 +1,6 @@
 import axios from "./root.service.js";
 import cookies from "js-cookie";
+import { getDeviceToken } from "@/utils/deviceToken";
 
 const API_URL = import.meta.env.VITE_BASE_URL || "http://localhost:3000/api";
 
@@ -20,8 +21,9 @@ export async function obtenerResumenAsistencia() {
   }
 }
 
-export async function markAttendance(date, { deviceToken, latitude, longitude }) {
+export async function markAttendance(date, { latitude, longitude }) {
   try {
+    const deviceToken = await getDeviceToken();
     const token = cookies.get("token");
   console.log("el token es  ",token);
     //if (!token) throw new Error("No hay token de autenticación");
