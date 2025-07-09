@@ -26,12 +26,14 @@ const Register = () => {
     } catch (err) {
       console.error("Error al registrar un usuario: ", err);
 
-        toast.custom(() => (
+        /*toast.custom(() => (
   <div className="bg-gray-100 border border-gray-200 rounded-md p-4 shadow-sm max-w-md w-full text-gray-900">
     <strong className="block mb-1">Hubo un problema al crear la cuenta</strong>
-    <p className="text-sm">{err}</p>
+    <p className="text-sm text-black">{err}</p>
   </div>
-));
+)); */
+
+  toast.error(err);
     }
   };
 

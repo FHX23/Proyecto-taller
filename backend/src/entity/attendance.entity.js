@@ -9,41 +9,50 @@ const AttendanceSchema = new EntitySchema({
       primary: true,
       generated: true,
     },
-    date: {
-      type: "date",
+    user_id: {
+      type: "int",
       nullable: false,
     },
-    checkInTime: {
+    workday_id: {
+      type: "int",
+      nullable: false,
+    },
+    device_id: {
+      type: "int",
+      nullable: false,
+    },
+    createdAt: {
       type: "timestamp with time zone",
       default: () => "CURRENT_TIMESTAMP",
-    },
-    latitude: {
-      type: "float",
-      nullable: true,
-    },
-    longitude: {
-      type: "float",
-      nullable: true,
-    },
-    ipAddress: {
-      type: "varchar",
-      length: 100,
-      nullable: true,
-    },
-    status: {
-      type: "varchar",
-      length: 20,
-      default: "present",
     },
   },
   relations: {
     user: {
       type: "many-to-one",
       target: "User",
-      joinColumn: true,
-      nullable: false,
+      joinColumn: { name: "user_id" },
+      onDelete: "CASCADE",
+    },
+    workday: {
+      type: "many-to-one",
+      target: "Workday",
+      joinColumn: { name: "workday_id" },
+      onDelete: "CASCADE",
+    },
+    device: {
+      type: "many-to-one",
+      target: "DeviceAssignment",
+      joinColumn: { name: "device_id" },
+      onDelete: "CASCADE",
     },
   },
+  indices: [
+    {
+      name: "IDX_ATTENDANCE_UNIQUE",
+      columns: ["user_id", "workday_id"],
+      unique: true,
+    },
+  ],
 });
 
 export default AttendanceSchema;

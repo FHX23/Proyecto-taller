@@ -12,6 +12,8 @@ import ProtectedRoute from "./components/layout/ProtectedRoute";
 
 // Páginas protegidas
 import Home from "./pages/protected/Home";
+import QRPage from "./pages/protected/Scanner";
+import QRDisplayPage from "./pages/protected/QRDisplayPage";
 
 const AppRouter = () => {
   return (
@@ -34,7 +36,10 @@ const AppRouter = () => {
         }
       >
         <Route path="/home" element={<Home />} />
+        <Route path="/attendance" element={<QRPage />} />
+        <Route path="/qr_display" element={<QRDisplayPage />} />
         {/* Agrega más rutas protegidas aquí */}
+        
       </Route>
 
       {/* Página 404 si no se encuentra ninguna ruta */}

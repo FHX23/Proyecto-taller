@@ -113,10 +113,8 @@ export const registerValidation = Joi.object({
 
   role: Joi.string()
     .valid("usuario", "administrador")
-    .required()
     .messages({
       "any.only": "El rol debe ser 'user' o 'admin'.",
-      "any.required": "El rol es obligatorio.",
     }),
 
   isMinor: Joi.boolean()
