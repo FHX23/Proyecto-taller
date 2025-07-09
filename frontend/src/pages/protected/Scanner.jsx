@@ -65,7 +65,7 @@ if (code) {
 
   const validPrefixes = [
     "https://proyecto-taller-production.up.railway.app/api/attendance",
-    "http://proyecto-taller-production.up.railway.app/markAttendance"
+    "http://proyecto-taller-production.up.railway.app/api/attendance/markAttendance"
   ];
 
   const isValid = validPrefixes.some(prefix => scanned.startsWith(prefix));
