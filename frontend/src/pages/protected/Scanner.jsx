@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
 import { Button } from "@/components/ui/button";
+import { markAttendance } from "@/services/attendance.service";
 
 function QRPage() {
   const videoRef = useRef(null);
@@ -57,43 +58,53 @@ function QRPage() {
       const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
       const code = jsQR(imageData.data, canvas.width, canvas.height);
 
-      if (code) {
-        const scanned = code.data;
-        setQrData(scanned);
-        setScanning(false);
+if (code) {
+  const scanned = code.data;
+  setQrData(scanned);
+  setScanning(false);
 
-        const validPrefix =
-          "https://proyecto-taller-production.up.railway.app/api/attendance";
-        if (scanned.startsWith(validPrefix)) {
-          sendToService(scanned);
-        } else {
-          setError("Código QR no válido.");
-        }
-        return;
-      }
+  const validPrefixes = [
+    "https://proyecto-taller-production.up.railway.app/api/attendance",
+    "http://proyecto-taller-production.up.railway.app/markAttendance"
+  ];
+
+  const isValid = validPrefixes.some(prefix => scanned.startsWith(prefix));
+
+  if (isValid) {
+    sendToService(scanned);
+  } else {
+    setError("Código QR no válido.");
+  }
+  return;
+}
     }
 
     requestRef.current = requestAnimationFrame(scanFrame);
   };
 
-  const sendToService = async (scannedUrl) => {
-    try {
-      const response = await fetch(scannedUrl, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ scannedAt: new Date().toISOString() }),
-      });
+  async function sendToService(scannedUrl) {
+  try {
+    const url = new URL(scannedUrl);
+    const date = url.pathname.split("/").pop(); // Extrae "2025-07-09"
 
-      if (!response.ok) throw new Error("Error al enviar datos");
+    const payload = {
+      deviceToken: "abcd1234",
+      latitude: -36.826991,
+      longitude: -73.049774,
+    };
 
-      console.log("Enviado correctamente");
-    } catch (err) {
-      console.error(err);
-      setError("Error al contactar con el servicio.");
+    const result = await markAttendance(date, payload);
+
+    if (result.status === "Error") {
+      setError(result.message || "No se pudo marcar asistencia");
+    } else {
+      console.log("Asistencia marcada correctamente:", result.data);
     }
-  };
+  } catch (err) {
+    console.error(err);
+    setError("Error al contactar con el servicio.");
+  }
+}
 
   return (
     <div className="flex flex-col items-center p-4 space-y-4">
