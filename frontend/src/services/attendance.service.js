@@ -25,9 +25,8 @@ export async function markAttendance(date, { deviceToken, latitude, longitude })
     const token = cookies.get("token");
 
     if (!token) throw new Error("No hay token de autenticación");
-
-    const res = await axios.post(
-      `/attendance/markAttendance/${date}`,
+    console.log("la date que llego al service es ",date);
+    const res = await axios.post(`${API_URL}/attendance/markAttendance/${date}`,
       {
         deviceToken,
         latitude,
