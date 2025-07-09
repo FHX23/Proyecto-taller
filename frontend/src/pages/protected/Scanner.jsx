@@ -59,10 +59,12 @@ function QRPage() {
       const code = jsQR(imageData.data, canvas.width, canvas.height);
 
 if (code) {
+  console.log("link escaneado",code.data);
   const scanned = code.data;
   setQrData(scanned);
   setScanning(false);
-
+sendToService(scanned);
+/*
   const validPrefixes = [
     "https://proyecto-taller-production.up.railway.app/api/attendance",
     "http://proyecto-taller-production.up.railway.app/api/attendance/markAttendance"
@@ -75,6 +77,7 @@ if (code) {
   } else {
     setError("Código QR no válido.");
   }
+    */
   return;
 }
     }
@@ -86,7 +89,7 @@ if (code) {
   try {
     const url = new URL(scannedUrl);
     const date = url.pathname.split("/").pop(); // Extrae "2025-07-09"
-
+    console.log("la fecha de hoy es",date);
     const payload = {
       deviceToken: "abcd1234",
       latitude: -36.826991,

@@ -21,7 +21,7 @@ export async function login(dataUser) {
 
       const deviceToken = await getDeviceToken();
       console.log(deviceToken);
-      await axios.post("/device/register", { deviceToken }); // el token JWT ya está en headers
+      //await axios.post("/device/register", { deviceToken }); // el token JWT ya está en headers
       
       return response.data;
     }
