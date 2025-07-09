@@ -19,13 +19,13 @@ export default function Landing() {
         <h1 className="text-5xl font-bold mb-4 text-slate-900 dark:text-green-900">
           Gestión de Asistencia con QR
         </h1>
-        <p className="text-xl mb-8 text-slate-700 dark:text-green-500 max-w-xl">
+        <p className="text-xl mb-8 text-slate-700 dark:text-green-600 max-w-xl">
           Controla entradas y salidas mediante escaneo de códigos QR. Rápido, simple y eficiente.
         </p>
         <div className="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
           <Link
             to="/login"
-            className="inline-flex justify-center items-center py-3 px-4 text-base font-medium text-white rounded-lg bg-green-400 hover:bg-green-700"
+            className="inline-flex justify-center items-center py-3 px-4 text-base font-medium text-white rounded-lg bg-yellow-700 hover:bg-green-700"
           >
             Iniciar Sesión
           </Link>
