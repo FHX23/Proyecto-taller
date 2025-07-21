@@ -22,11 +22,7 @@ export async function obtenerResumenAsistencia() {
     });
     return res.data; // Devuelve el JSON completo
   } catch (error) {
-    return error.response?.data || {
-      status: "Error",
-      message: "Error desconocido",
-      data: [],
-    };
+    throw error.response?.data?.message || "Hubo un problema al obtener asistencias.";
   }
 }
 
@@ -49,10 +45,6 @@ export async function markAttendance(date, { latitude, longitude }) {
 
     return res.data;
   } catch (error) {
-    return error.response?.data || {
-      status: "Error",
-      message: "Error desconocido",
-      data: null,
-    };
+    throw error.response?.data?.message || "Hubo un problema al marcar asistencia.";
   }
 }

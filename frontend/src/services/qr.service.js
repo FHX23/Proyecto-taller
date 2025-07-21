@@ -9,6 +9,6 @@ export async function obtenerQR() {
     console.log(data.data);
     return data.data; // retorna directamente el objeto `{ qrImage: ... }`
   } catch (error) {
-    return error.response?.data || { status: "Error", message: "Error desconocido" };
+    throw error.response?.data?.message || "Hubo un problema al crear al obtener QR.";
   }
 }

@@ -8,7 +8,7 @@ export async function generateDailyAttendanceQR(baseURL) {
     const qr = await QRCode.toDataURL(url);
     return [qr, null];
   } catch (err) {
-    console.error("QR generation error:", err);
-    return [null, "QR generation failed"];
+    console.error("Error al generar QR:", err);
+    return [null, "Error interno del servidor al generar QR:"];
   }
 }

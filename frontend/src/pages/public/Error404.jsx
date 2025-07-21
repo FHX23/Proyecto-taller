@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export default function Error404() {
+const Error404 = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex items-center justify-center gap-2 p-8 lg:px-6 ">
@@ -48,3 +48,5 @@ export default function Error404() {
     </div>
   );
 }
+
+export default Error404;

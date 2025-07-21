@@ -13,8 +13,9 @@ export async function markAttendanceController(req, res) {
     const date = req.params.date; // from QR URL
     const ipAddress = req.ip;
 
+    //! cambiar por joi
     if (!userId || !deviceToken || !date)
-      return handleErrorClient(res, 400, "Insufficient data");
+      return handleErrorClient(res, 400, "Data insuficiente");
 
     const [result, error] = await markAttendanceService({
       userId,
@@ -27,7 +28,7 @@ export async function markAttendanceController(req, res) {
 
     if (error) return handleErrorClient(res, 400, error);
 
-    handleSuccess(res, 201, "Attendance recorded", result);
+    handleSuccess(res, 201, "Asistencia registrada", result);
   } catch (err) {
     handleErrorServer(res, 500, err.message);
   }
@@ -37,7 +38,7 @@ export async function getAttendanceSummaryController(req, res) {
   try {
     const [data, error] = await getUserAttendanceCounts();
     if (error) return handleErrorServer(res, 500, error);
-    handleSuccess(res, 200, "Attendance summary retrieved", data);
+    handleSuccess(res, 200, "Datos obtenidos con exito", data);
   } catch (err) {
     handleErrorServer(res, 500, err.message);
   }

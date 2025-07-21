@@ -26,7 +26,7 @@ export async function login(dataUser) {
       return response.data;
     }
   } catch (error) {
-    return error.response.data;
+    throw error.response?.data?.details || "Hubo un problema al iniciar sesion.";
   }
 }
 

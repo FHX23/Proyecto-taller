@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
 import { Button } from "@/components/ui/button";
 import { markAttendance } from "@/services/attendance.service";
+import { toast } from "sonner";
 
-function QRPage() {
+const QRPage = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
@@ -105,7 +106,11 @@ sendToService(scanned);
     }
   } catch (err) {
     console.error(err);
-    setError("Error al contactar con el servicio.");
+    const mensaje = err?.response?.data?.message || err?.message || "Error desconocido";
+    setError(mensaje);
+    toast.error(mensaje);
+
+    
   }
 }
 

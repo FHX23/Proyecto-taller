@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export default function AttendancePage() {
+const AttendancePage = () => {
   const [data, setData] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState(null);
@@ -67,3 +67,5 @@ export default function AttendancePage() {
     </div>
   );
 }
+
+export default AttendancePage;

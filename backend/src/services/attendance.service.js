@@ -83,8 +83,8 @@ export async function markAttendanceService({
     console.log("Asistencia marcada con éxito:", newAttendance);
     return [newAttendance, null];
   } catch (error) {
-    console.error("Attendance marking error:", error.stack);
-    return [null, "Internal server error while marking attendance"];
+    console.error("Error al marcar asistencia:", error.stack);
+    return [null, "Error interno del servidor en marcar asistencia"];
   }
 }
 
@@ -104,7 +104,7 @@ export async function getUserAttendanceCounts() {
 
     return [result, null];
   } catch (error) {
-    console.error("Error getting attendance counts:", error);
-    return [null, "Error retrieving attendance summary"];
+    console.error("Error al obtener lista asistencia:", error);
+    return [null, "Error interno del servidor al obtener lista asistencia"];
   }
 }
