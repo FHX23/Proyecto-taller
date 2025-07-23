@@ -13,14 +13,15 @@ function addRandomSuffix(token) {
   return token + '-' + suffix;
 }
 
-export async function obtenerResumenAsistencia() {
+export async function obtenerResumenAsistencia(startDate, endDate) {
   try {
     const res = await axios.get("/attendance/getAttendance", {
+      params: { startDate, endDate },
       headers: {
         Authorization: `Bearer ${cookies.get("token") || ""}`,
       },
     });
-    return res.data; // Devuelve el JSON completo
+    return res.data;
   } catch (error) {
     throw error.response?.data?.message || "Hubo un problema al obtener asistencias.";
   }

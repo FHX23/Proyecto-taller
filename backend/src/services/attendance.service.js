@@ -88,15 +88,17 @@ export async function markAttendanceService({
   }
 }
 
-export async function getUserAttendanceCounts() {
+export async function getUserAttendanceCounts(startDate, endDate) {
   try {
     const result = await AppDataSource
       .getRepository(Attendance)
       .createQueryBuilder("attendance")
+      .innerJoin("attendance.user", "user")
+      .innerJoin("attendance.workday", "workday")
       .select("user.fullName", "fullName")
       .addSelect("user.rut", "rut")
       .addSelect("COUNT(attendance.id)", "attendanceCount")
-      .innerJoin("attendance.user", "user")
+      .where("workday.date BETWEEN :startDate AND :endDate", { startDate, endDate })
       .groupBy("user.id")
       .addGroupBy("user.fullName")
       .addGroupBy("user.rut")
