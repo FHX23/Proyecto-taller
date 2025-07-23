@@ -13,20 +13,17 @@ function addRandomSuffix(token) {
   return token + '-' + suffix;
 }
 
-export async function obtenerResumenAsistencia() {
+export async function obtenerResumenAsistencia(startDate, endDate) {
   try {
     const res = await axios.get("/attendance/getAttendance", {
+      params: { startDate, endDate },
       headers: {
         Authorization: `Bearer ${cookies.get("token") || ""}`,
       },
     });
-    return res.data; // Devuelve el JSON completo
+    return res.data;
   } catch (error) {
-    return error.response?.data || {
-      status: "Error",
-      message: "Error desconocido",
-      data: [],
-    };
+    throw error.response?.data?.message || "Hubo un problema al obtener asistencias.";
   }
 }
 
@@ -38,7 +35,7 @@ export async function markAttendance(date, { latitude, longitude }) {
     
     const token = cookies.get("token");
     //if (!token) throw new Error("No hay token de autenticación");
-    console.log("La date que llegó al service es", date);
+
     const res = await axios.post(`${API_URL}/attendance/markAttendance/${date}`,
       {
         deviceToken,
@@ -49,10 +46,6 @@ export async function markAttendance(date, { latitude, longitude }) {
 
     return res.data;
   } catch (error) {
-    return error.response?.data || {
-      status: "Error",
-      message: "Error desconocido",
-      data: null,
-    };
+    throw error.response?.data?.message || "Hubo un problema al marcar asistencia.";
   }
 }

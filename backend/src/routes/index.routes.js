@@ -5,7 +5,7 @@ import authRoutes from "./auth.routes.js";
 import attendanceRoutes from "./attendance.routes.js"
 import qrRoutes from "./qr.routes.js"
 import deviceRoutes from "./device.routes.js"
-
+import workdayRoutes from "./workday.routes.js"
 const router = Router();
 
 router
@@ -13,6 +13,7 @@ router
     .use("/user", userRoutes)
     .use("/attendance",attendanceRoutes)
     .use("/qr",qrRoutes)
-    .use("/device", deviceRoutes);
+    .use("/device", deviceRoutes)
+    .use("/workday",workdayRoutes);
     
 export default router;

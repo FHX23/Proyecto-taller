@@ -83,20 +83,22 @@ export async function markAttendanceService({
     console.log("Asistencia marcada con éxito:", newAttendance);
     return [newAttendance, null];
   } catch (error) {
-    console.error("Attendance marking error:", error.stack);
-    return [null, "Internal server error while marking attendance"];
+    console.error("Error al marcar asistencia:", error.stack);
+    return [null, "Error interno del servidor en marcar asistencia"];
   }
 }
 
-export async function getUserAttendanceCounts() {
+export async function getUserAttendanceCounts(startDate, endDate) {
   try {
     const result = await AppDataSource
       .getRepository(Attendance)
       .createQueryBuilder("attendance")
+      .innerJoin("attendance.user", "user")
+      .innerJoin("attendance.workday", "workday")
       .select("user.fullName", "fullName")
       .addSelect("user.rut", "rut")
       .addSelect("COUNT(attendance.id)", "attendanceCount")
-      .innerJoin("attendance.user", "user")
+      .where("workday.date BETWEEN :startDate AND :endDate", { startDate, endDate })
       .groupBy("user.id")
       .addGroupBy("user.fullName")
       .addGroupBy("user.rut")
@@ -104,7 +106,7 @@ export async function getUserAttendanceCounts() {
 
     return [result, null];
   } catch (error) {
-    console.error("Error getting attendance counts:", error);
-    return [null, "Error retrieving attendance summary"];
+    console.error("Error al obtener lista asistencia:", error);
+    return [null, "Error interno del servidor al obtener lista asistencia"];
   }
 }

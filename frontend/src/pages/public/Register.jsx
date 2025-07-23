@@ -10,32 +10,34 @@ const Register = () => {
   const navigate = useNavigate();
   const { errorEmail, errorRut, errorData, handleInputChange } = useRegister();
 
-  const registerSubmit = async (data) => {
-    try {
-      const response = await register(data);
 
-      if (response.status === "Success") {
-        toast.success("Cuenta creada exitosamente", {
-          description: "Serás redirigido al login.",
-        });
+const registerSubmit = async (data) => {
+  try {
+    const response = await register(data);
 
-        setTimeout(() => {
-          navigate("/login");
-        }, 1500);
-      } 
-    } catch (err) {
-      console.error("Error al registrar un usuario: ", err);
+    toast.success("Cuenta creada exitosamente", {
+  description: (
+    <span className="text-gray-700 dark:text-gray-300">
+      Serás redirigido al login.
+    </span>
+  ),
+});
 
-        /*toast.custom(() => (
-  <div className="bg-gray-100 border border-gray-200 rounded-md p-4 shadow-sm max-w-md w-full text-gray-900">
-    <strong className="block mb-1">Hubo un problema al crear la cuenta</strong>
-    <p className="text-sm text-black">{err}</p>
-  </div>
-)); */
+    setTimeout(() => {
+      navigate("/login");
+    }, 1500);
 
-  toast.error(err);
-    }
-  };
+  } catch (err) {
+    console.error("Error al registrar un usuario:", err);
+
+    const errorMessage =
+      typeof err === "string"
+        ? err
+        : err?.message || "Hubo un problema al registrar la cuenta.";
+
+    toast.error(errorMessage);
+  }
+};
 
   return (
     <div className="flex flex-col min-h-screen">

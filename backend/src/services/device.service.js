@@ -12,7 +12,7 @@ export async function registerDeviceTokenService({ userId, deviceToken }) {
 
     // Ya está registrado por otro usuario
     if (existing && existing.user.id !== userId) {
-      return [null, "This device is already assigned to another user"];
+      return [null, "Este dispositivo ya esta registrado en otro usuario"];
     }
 
     // Ya está asignado a este usuario
@@ -30,7 +30,7 @@ export async function registerDeviceTokenService({ userId, deviceToken }) {
 
     return [newDevice, null];
   } catch (err) {
-    console.error("Device service error:", err);
-    return [null, "Error registering device"];
+    console.error("Error al registrar dispositivo:", err);
+    return [null, "Error interno del servidor al registrar dispositivo:"];
   }
 }

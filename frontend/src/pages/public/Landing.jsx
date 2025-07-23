@@ -5,7 +5,7 @@ import Footer from "@/components/layout/Footer";
 import { Button } from "@/components/ui/button";
 import { ScanQrCode } from "lucide-react";
 
-export default function Landing() {
+const Landing = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <header className="flex items-center justify-center gap-2 p-8 lg:px-6">
@@ -42,3 +42,5 @@ export default function Landing() {
     </div>
   );
 }
+
+export default Landing;

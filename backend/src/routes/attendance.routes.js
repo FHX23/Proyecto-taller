@@ -8,5 +8,4 @@ const router = Router();
 router
   .post("/markAttendance/:date", authenticateJWT,markAttendanceController)
   .get("/getAttendance",getAttendanceSummaryController)
-  router.post("/workday/createToday", createTodayWorkdayController);
 export default router;

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { NavLink, useNavigate, Outlet } from "react-router-dom";
-import { Menu, School, User } from "lucide-react";
+import { Menu, ScanQrCode , User } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,8 +54,8 @@ export default function MainLayout() {
         <div className="container flex h-14 items-center justify-between px-8">
           {/* Logo */}
           <a className="flex items-center space-x-2" href="/home">
-            <School className="h-6 w-6 text-green-500" />
-            <span className="font-bold">MiLiceo</span>
+            <ScanQrCode className="h-6 w-6 text-green-500" />
+            <span className="font-bold">ScanWork</span>
           </a>
 
           {/* Botón menú móvil */}

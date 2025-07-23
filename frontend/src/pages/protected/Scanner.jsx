@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
 import { Button } from "@/components/ui/button";
 import { markAttendance } from "@/services/attendance.service";
+import { toast } from "sonner";
 
-function QRPage() {
+const QRPage = () => {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const requestRef = useRef(null);
@@ -63,11 +64,14 @@ if (code) {
   const scanned = code.data;
   setQrData(scanned);
   setScanning(false);
-sendToService(scanned);
-/*
+
+//sendToService(scanned);
+
   const validPrefixes = [
-    "https://proyecto-taller-production.up.railway.app/api/attendance",
-    "http://proyecto-taller-production.up.railway.app/api/attendance/markAttendance"
+    "http://proyecto-taller-production.up.railway.app/api/attendance/markAttendance",
+    "https://proyecto-taller-production.up.railway.app/api/attendance/markAttendance",
+    "http://localhost:3000/api/attendance/markAttendance",
+    "https://localhost:3000/api/attendance/markAttendance"
   ];
 
   const isValid = validPrefixes.some(prefix => scanned.startsWith(prefix));
@@ -77,7 +81,7 @@ sendToService(scanned);
   } else {
     setError("Código QR no válido.");
   }
-    */
+    
   return;
 }
     }
@@ -85,11 +89,10 @@ sendToService(scanned);
     requestRef.current = requestAnimationFrame(scanFrame);
   };
 
-  async function sendToService(scannedUrl) {
+async function sendToService(scannedUrl) {
   try {
     const url = new URL(scannedUrl);
-    const date = url.pathname.split("/").pop(); // Extrae "2025-07-09"
-    console.log("la fecha de hoy es",date);
+    const date = url.pathname.split("/").pop(); 
     const payload = {
       deviceToken: "abcd1234",
       latitude: -36.826991,
@@ -98,14 +101,26 @@ sendToService(scanned);
 
     const result = await markAttendance(date, payload);
 
-    if (result.status === "Error") {
-      setError(result.message || "No se pudo marcar asistencia");
-    } else {
-      console.log("Asistencia marcada correctamente:", result.data);
-    }
+    toast.success("Asistencia marcada correctamente", {
+      description: (
+        <span className="text-gray-700 dark:text-gray-300">
+          Registro enviado con éxito al sistema.
+        </span>
+      ),
+    });
+
+    console.log("Asistencia marcada correctamente:", result.data);
+
   } catch (err) {
-    console.error(err);
-    setError("Error al contactar con el servicio.");
+    console.error("Error al marcar asistencia:", err);
+
+    const mensaje =
+      typeof err === "string"
+        ? err
+        : err?.message || "Error desconocido al marcar asistencia.";
+
+    toast.error(mensaje);
+    setError(mensaje);
   }
 }
 

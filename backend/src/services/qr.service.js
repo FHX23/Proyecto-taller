@@ -3,12 +3,12 @@ import { format } from "date-fns";
 
 export async function generateDailyAttendanceQR(baseURL) {
   const date = format(new Date(), "yyyy-MM-dd");
-  const url = `${baseURL}/attendance/markAttendance/${date}`;
+  const url = `${baseURL}/api/attendance/markAttendance/${date}`;
   try {
     const qr = await QRCode.toDataURL(url);
     return [qr, null];
   } catch (err) {
-    console.error("QR generation error:", err);
-    return [null, "QR generation failed"];
+    console.error("Error al generar QR:", err);
+    return [null, "Error interno del servidor al generar QR:"];
   }
 }

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { obtenerQR } from "@/services/qr.service";
 import { Button } from "@/components/ui/button";
 
-function QRDisplayPage() {
+const QRDisplayPage = () => {
   const [qrImage, setQrImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

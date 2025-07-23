@@ -12,19 +12,19 @@ const Login = () => {
 
   const loginSubmit = async (data) => {
     try {
-      const response = await login(data);
-      if (response.status === "Success") {
-        toast.success("Inicio de sesión exitoso");
-        navigate("/home");
-      } else if (response.status === "Client error") {
-        errorData(response.details);
-        toast.error("Hubo un problema al iniciar sesión. Verifica tus datos.");
-      }
-    } catch (error) {
-      console.log(error);
-      toast.error("No se pudo conectar con el servidor. Intenta más tarde.");
-    }
-  };
+    const response = await login(data); 
+    toast.success("Inicio de sesión exitoso");
+    navigate("/home");
+    
+  } catch (error) {
+    const errorMessage =
+      typeof error === "string"
+        ? error
+        : error?.message || "Error interno del servidor.";
+
+    toast.error(errorMessage);
+  }
+};
 
   return (
     <div className="flex flex-col min-h-screen">

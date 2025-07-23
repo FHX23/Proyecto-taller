@@ -11,16 +11,16 @@ export async function registerDeviceTokenController(req, res) {
     const { deviceToken } = req.body;
 
     if (!userId || !deviceToken) {
-      return handleErrorClient(res, 400, "Missing user or device token");
+      return handleErrorClient(res, 400, "No hay user o token");
     }
 
     const [result, error] = await registerDeviceTokenService({ userId, deviceToken });
 
     if (error) return handleErrorClient(res, 400, error);
 
-    return handleSuccess(res, 201, "Device token registered", result);
-  } catch (err) {
+    return handleSuccess(res, 201, "Token del dispositivo registrado", result);
+  } catch (error) {
     console.error("Device register error:", err);
-    return handleErrorServer(res, 500, "Internal server error");
+    return handleErrorServer(res, 500, error.message);
   }
 }

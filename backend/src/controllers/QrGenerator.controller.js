@@ -12,7 +12,7 @@ export async function generateDailyQRController(req, res) {
 
     if (error) return handleErrorServer(res, 500, error);
 
-    handleSuccess(res, 200, "QR generated", { qrImage });
+    handleSuccess(res, 200, "QR generado", { qrImage });
   } catch (error) {
     handleErrorServer(res, 500, error.message);
   }
