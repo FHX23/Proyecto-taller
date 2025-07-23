@@ -10,6 +10,16 @@ import { cookieKey, HOST, PORT } from "./config/configEnv.js";
 import { connectDB } from "./config/config.Db.js";
 import { createUsers } from "./config/initialSetup.js";
 import { passportJwtSetup } from "./auth/passport.auth.js";
+import {
+  scheduleDailyWorkdayJob,
+  runCreateTodayWorkdayOnStartup,
+} from "./jobs/createTodayWorkdayJob.js"
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc.js";
+import timezone from "dayjs/plugin/timezone.js";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
 
 async function setupServer() {
   try {
@@ -74,6 +84,10 @@ async function setupAPI() {
     await connectDB();
     await setupServer();
     await createUsers();
+    await runCreateTodayWorkdayOnStartup();
+    scheduleDailyWorkdayJob();
+    const todayDateOnly = dayjs().tz("America/Santiago").format("YYYY-MM-DD");
+    console.log("Fecha detectada:", todayDateOnly);
   } catch (error) {
     console.log("Error: ", error);
   }
