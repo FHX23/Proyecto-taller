@@ -17,7 +17,7 @@ export async function runCreateTodayWorkdayOnStartup() {
 }
 
 export function scheduleDailyWorkdayJob() {
-  cron.schedule("5 0 * * *", async () => {
+  cron.schedule("5 4 * * *", async () => {
     await runCreateTodayWorkdayOnStartup();
   });
 }
