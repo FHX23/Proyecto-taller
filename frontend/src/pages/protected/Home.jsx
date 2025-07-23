@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { QrCode, Eye } from "lucide-react";
+import { QrCode, Eye, Calendar } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const Home = () => {
@@ -35,6 +35,14 @@ const Home = () => {
           >
             <QrCode className="w-5 h-5" />
             <span>Ver QR del dia</span>
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => navigate("/workdays")}
+            className="flex items-center justify-center space-x-2"
+          >
+            <Calendar className="w-5 h-5" />
+            <span>Ver calendario</span>
           </Button>
         </div>
       </div>
