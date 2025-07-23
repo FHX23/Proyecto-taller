@@ -6,12 +6,12 @@ const Home = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="p-6 min-h-screen">
+    <div className="p-6 min-h-screen ml-32 max-w-7xl px-32">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 
       <div>
         <h2 className="font-semibold mb-2">Acciones rápidas</h2>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 gap-4 ">
           <Button
             variant="outline"
             onClick={() => navigate("/table_attendance")}

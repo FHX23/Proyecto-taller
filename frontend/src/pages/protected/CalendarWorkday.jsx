@@ -1,64 +1,60 @@
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
-import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogTrigger,
-  DialogOverlay,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { getAllWorkdays, createWorkdayManual } from "@/services/workDay.service";
-import dayjs from "dayjs";
-import { Switch } from "@/components/ui/switch";
+"use client"
+
+import { useEffect, useState } from "react"
+import { toast } from "sonner"
+import { Calendar } from "@/components/ui/calendar"
+import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { getAllWorkdays, createWorkdayManual } from "@/services/workDay.service"
+import dayjs from "dayjs"
+import { Switch } from "@/components/ui/switch"
 
 const CalendarWorkday = () => {
-  const [workdays, setWorkdays] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
-  const [isWorkingDay, setIsWorkingDay] = useState(true);
-  const [payAmount, setPayAmount] = useState("");
-  const [dialogOpen, setDialogOpen] = useState(false);
+  const [workdays, setWorkdays] = useState([])
+  const [selectedDate, setSelectedDate] = useState(null)
+  const [isWorkingDay, setIsWorkingDay] = useState(true)
+  const [payAmount, setPayAmount] = useState("")
+  const [dialogOpen, setDialogOpen] = useState(false)
 
   useEffect(() => {
     const fetch = async () => {
       try {
-        const data = await getAllWorkdays();
-        setWorkdays(data.map((w) => w.date));
+        const data = await getAllWorkdays()
+        setWorkdays(data.map((w) => w.date))
       } catch (error) {
-        toast.error("Error al obtener los días laborales.");
+        toast.error("Error al obtener los días laborales.")
       }
-    };
-    fetch();
-  }, []);
+    }
+    fetch()
+  }, [])
 
   const isDateInWorkdays = (date) => {
-    return workdays.includes(dayjs(date).format("YYYY-MM-DD"));
-  };
+    return workdays.includes(dayjs(date).format("YYYY-MM-DD"))
+  }
 
   const handleDateSelect = (date) => {
-    setSelectedDate(date);
+    setSelectedDate(date)
     if (isDateInWorkdays(date)) {
-      toast.warning("Ya existe un Workday para este día.");
-      setDialogOpen(false);
+      toast.warning("Ya existe un Workday para este día.")
+      setDialogOpen(false)
     } else {
-      setDialogOpen(true);
+      setDialogOpen(true)
     }
-  };
+  }
 
   const handleCreate = async () => {
-    const date = dayjs(selectedDate).format("YYYY-MM-DD");
-
+    const date = dayjs(selectedDate).format("YYYY-MM-DD")
     if (isDateInWorkdays(date)) {
-      toast.warning("Ya existe un Workday para este día.");
-      setDialogOpen(false);
-      return;
+      toast.warning("Ya existe un Workday para este día.")
+      setDialogOpen(false)
+      return
     }
 
     if (isWorkingDay && (!payAmount || Number(payAmount) <= 0)) {
-      toast.error("Ingrese un monto válido.");
-      return;
+      toast.error("Ingrese un monto válido.")
+      return
     }
 
     try {
@@ -66,20 +62,26 @@ const CalendarWorkday = () => {
         date,
         isWorkingDay,
         payAmount: isWorkingDay ? Number(payAmount) : null,
-      });
-      toast.success("Workday creado exitosamente.");
-      setWorkdays((prev) => [...prev, date]);
-      setPayAmount("");
-      setDialogOpen(false);
+      })
+      toast.success("Workday creado exitosamente.")
+      setWorkdays((prev) => [...prev, date])
+      setPayAmount("")
+      setDialogOpen(false)
     } catch (error) {
-      toast.error("Error al crear el Workday.");
+      toast.error("Error al crear el Workday.")
     }
-  };
+  }
+
+  const handleDialogClose = () => {
+    setDialogOpen(false)
+    setPayAmount("")
+    setIsWorkingDay(true)
+  }
 
   return (
-    <>
+    <div className="min-h-screen bg-background">
       {/* CALENDARIO */}
-      <div className="max-w-xl mx-auto mt-10 space-y-6">
+      <div className="max-w-xl mx-auto pt-10 space-y-6 px-4">
         <h2 className="text-2xl font-bold text-center">Calendario de Workdays</h2>
         <Calendar
           mode="single"
@@ -89,76 +91,84 @@ const CalendarWorkday = () => {
             hasWorkday: (date) => isDateInWorkdays(date),
           }}
           modifiersClassNames={{
-            hasWorkday: "bg-green-300 text-white",
+            hasWorkday: "bg-green-500 text-white hover:bg-green-600",
           }}
-          className="rounded-md border"
+          className="rounded-md border shadow-sm"
         />
         {selectedDate && !isDateInWorkdays(selectedDate) && (
-          <Button
-            className="w-full"
-            onClick={() => setDialogOpen(true)}
-          >
+          <Button className="w-full" onClick={() => setDialogOpen(true)}>
             Crear Workday para {dayjs(selectedDate).format("DD/MM/YYYY")}
           </Button>
         )}
       </div>
 
-      {/* DIALOG FUERA DEL FLUJO VISUAL */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="z-[9999] sm:max-w-md">
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-center">
-              Crear Workday - {dayjs(selectedDate).format("DD/MM/YYYY")}
-            </h3>
+      {/* DIALOG */}
+      <Dialog open={dialogOpen} onOpenChange={handleDialogClose}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-center">
+              Crear Workday - {selectedDate && dayjs(selectedDate).format("DD/MM/YYYY")}
+            </DialogTitle>
+          </DialogHeader>
 
-            <div className="flex items-center justify-between gap-4">
-              <Label htmlFor="isWorkingDay" className="text-base">
-                ¿Es día laboral?
-              </Label>
-              <div className="flex items-center gap-2">
-                <span
-                  className={
-                    isWorkingDay ? "text-green-600 font-semibold" : "text-muted-foreground"
-                  }
-                >
-                  Sí
-                </span>
-                <Switch
-                  id="isWorkingDay"
-                  checked={isWorkingDay}
-                  onCheckedChange={setIsWorkingDay}
-                />
-                <span
-                  className={
-                    !isWorkingDay ? "text-red-600 font-semibold" : "text-muted-foreground"
-                  }
-                >
-                  No
-                </span>
-              </div>
-            </div>
+         <div className="space-y-6 py-4">
+  <div className="flex items-center justify-between gap-4">
+    <Label htmlFor="isWorkingDay" className="text-base font-medium">
+      ¿Es día laboral?
+    </Label>
+    <div className="flex gap-2">
+      <Button
+        type="button"
+        variant={isWorkingDay ? "default" : "outline"}
+        className={isWorkingDay ? "bg-green-600 hover:bg-green-700 text-white" : ""}
+        onClick={() => setIsWorkingDay(true)}
+      >
+        Sí
+      </Button>
+      <Button
+        type="button"
+        variant={!isWorkingDay ? "default" : "outline"}
+        className={!isWorkingDay ? "bg-red-600 hover:bg-red-700 text-white" : ""}
+        onClick={() => setIsWorkingDay(false)}
+      >
+        No
+      </Button>
+    </div>
+  </div>
 
-            {isWorkingDay && (
-              <div className="space-y-1">
-                <Label htmlFor="payAmount">Monto de pago:</Label>
-                <Input
-                  id="payAmount"
-                  type="number"
-                  value={payAmount}
-                  onChange={(e) => setPayAmount(e.target.value)}
-                  placeholder="Ej: 30000"
-                />
-              </div>
-            )}
+  {isWorkingDay && (
+    <div className="space-y-2">
+      <Label htmlFor="payAmount" className="text-sm font-medium">
+        Monto de pago:
+      </Label>
+      <Input
+        id="payAmount"
+        type="number"
+        value={payAmount}
+        onChange={(e) => setPayAmount(e.target.value)}
+        placeholder="Ej: 30000"
+        className="w-full"
+      />
+    </div>
+  )}
 
-            <Button onClick={handleCreate} className="w-full mt-4">
-              Confirmar creación
-            </Button>
-          </div>
+  <div className="flex gap-3 pt-4">
+    <Button
+      variant="outline"
+      onClick={handleDialogClose}
+      className="flex-1 bg-transparent"
+    >
+      Cancelar
+    </Button>
+    <Button onClick={handleCreate} className="flex-1">
+      Confirmar creación
+    </Button>
+  </div>
+</div>
         </DialogContent>
       </Dialog>
-    </>
-  );
-};
+    </div>
+  )
+}
 
-export default CalendarWorkday;
+export default CalendarWorkday
