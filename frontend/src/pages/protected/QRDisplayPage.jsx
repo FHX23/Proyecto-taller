@@ -1,7 +1,7 @@
-// src/pages/QRDisplayPage.jsx o .tsx
 import { useEffect, useState } from "react";
 import { obtenerQR } from "@/services/qr.service";
 import { Button } from "@/components/ui/button";
+import jsPDF from "jspdf";
 
 const QRDisplayPage = () => {
   const [qrImage, setQrImage] = useState(null);
@@ -19,6 +19,30 @@ const QRDisplayPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const generarPDF = () => {
+    if (!qrImage) return;
+
+    const date = new Date();
+    const formatter = new Intl.DateTimeFormat("es-CL", {
+      timeZone: "America/Santiago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+
+    const [{ value: day }, , { value: month }, , { value: year }] = formatter.formatToParts(date);
+    const nombreArchivo = `QR (${year}-${month}-${day}).pdf`;
+
+    const pdf = new jsPDF();
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const qrSize = 150;
+    const x = (pageWidth - qrSize) / 2;
+    const y = 40;
+
+    pdf.addImage(qrImage, 'PNG', x, y, qrSize, qrSize);
+    pdf.save(nombreArchivo);
   };
 
   useEffect(() => {
@@ -39,9 +63,10 @@ const QRDisplayPage = () => {
         />
       )}
 
-      <Button onClick={cargarQR}>Generar nuevo QR</Button>
+      <Button className="bg-white text-black border border-black hover:bg-gray-200 "
+      onClick={generarPDF}>Generar impresión (PDF)</Button>
     </div>
   );
-}
+};
 
 export default QRDisplayPage;
