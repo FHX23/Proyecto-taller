@@ -135,3 +135,37 @@ export async function deactivateUserService({ id }) {
     return [null, "Error interno del servidor"];
   }
 }
+
+export async function activateUserService({ id }) {
+  try {
+    const userRepository = AppDataSource.getRepository(User);
+
+    const userFound = await userRepository.findOne({
+      where: { id },
+    });
+
+    if (!userFound) return [null, "Usuario no encontrado"];
+
+    if (userFound.isActive) {
+      return [null, "El usuario ya está activo"];
+    }
+
+    await userRepository.update(id, {
+      isActive: true,
+      updatedAt: new Date(),
+    });
+
+    const userUpdated = await userRepository.findOne({ where: { id } });
+
+    if (!userUpdated) {
+      return [null, "Usuario no encontrado después de activar"];
+    }
+
+    const { password, ...dataUser } = userUpdated;
+
+    return [dataUser, null];
+  } catch (error) {
+    console.error("Error al activar un usuario:", error);
+    return [null, "Error interno del servidor"];
+  }
+}

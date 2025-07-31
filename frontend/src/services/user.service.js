@@ -63,6 +63,30 @@ export async function deactivateUsers(ids) {
   }
 }
 
+export async function activateUser(id) {
+  try {
+    const { data } = await axios.patch(`/user/activateUser/${id}`);
+    return data;
+  } catch (error) {
+    if (error.response?.data?.details && Object.keys(error.response.data.details).length > 0) {
+      throw error.response.data.details;
+    }
+    throw error.response?.data?.message || "Hubo un problema al activar el usuario.";
+  }
+}
+
+export async function activateUsers(ids) {
+  try {
+    const { data } = await axios.patch(`/user/activateUsers`, { ids });
+    return data;
+  } catch (error) {
+    if (error.response?.data?.details && Object.keys(error.response.data.details).length > 0) {
+      throw error.response.data.details;
+    }
+    throw error.response?.data?.message || "Hubo un problema al activar los usuarios.";
+  }
+}
+
 export async function getUsersWithFilters(filters = {}) {
   try {
     const params = new URLSearchParams(filters).toString();

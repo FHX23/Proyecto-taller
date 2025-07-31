@@ -8,6 +8,8 @@ import {
   updateUser,
   deactivateUser,
   deactivateUsers,
+  activateUser,
+  activateUsers
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -21,5 +23,8 @@ router
   .get("/getUsers", getUsers)
   .put("/updateUser/:id", updateUser)
   .patch("/deactivateUser/:id", deactivateUser)
-  .patch("/deactivateUsers", deactivateUsers);
+  .patch("/deactivateUsers", deactivateUsers)
+  .patch("/activateUser/:id", activateUser)
+  .patch("/activateUsers", activateUsers);
+  
 export default router;

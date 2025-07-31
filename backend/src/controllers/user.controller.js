@@ -164,3 +164,63 @@ export async function deactivateUsers(req, res) {
     handleErrorServer(res, 500, error.message);
   }
 }
+
+export async function activateUser(req, res) {
+  try {
+    const { id } = req.params;
+
+    const { error: paramsError } = userParamsValidation.validate(
+      { id },
+      { abortEarly: false }
+    );
+
+    if (paramsError) {
+      return handleErrorClient(
+        res,
+        400,
+        "Error en el Params enviado",
+        paramsError.message,
+      );
+    }
+
+    const [userActivated, errorUserActivated] = await activateUserService({ id });
+
+    if (errorUserActivated) {
+      return handleErrorClient(res, 404, "Error al activar el usuario", errorUserActivated);
+    }
+
+    handleSuccess(res, 200, "Usuario activado correctamente", userActivated);
+  } catch (error) {
+    handleErrorServer(res, 500, error.message);
+  }
+}
+
+export async function activateUsers(req, res) {
+  try {
+    const { ids } = req.body;
+
+    const { error: bodyError } = multipleUserIdsValidation.validate(
+      { ids },
+      { abortEarly: false }
+    );
+
+    if (bodyError) {
+      return handleErrorClient(
+        res,
+        400,
+        "Error en los IDs enviados",
+        bodyError.message
+      );
+    }
+
+    const results = [];
+    for (const id of ids) {
+      const [user, error] = await activateUserService({ id });
+      results.push({ id, success: !error, message: error || "Activado correctamente" });
+    }
+
+    return handleSuccess(res, 200, "Resultado de activación múltiple", results);
+  } catch (error) {
+    handleErrorServer(res, 500, error.message);
+  }
+}
