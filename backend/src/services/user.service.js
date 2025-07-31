@@ -2,6 +2,7 @@
 import User from "../entity/user.entity.js";
 import { AppDataSource } from "../config/config.Db.js";
 import { comparePassword, encryptPassword } from "../helpers/bcrypt.helper.js";
+import { Not } from "typeorm";
 
 export async function getUserService({ id }) {
   try {
@@ -43,47 +44,41 @@ export async function updateUserService({ id }, body) {
   try {
     const userRepository = AppDataSource.getRepository(User);
 
-    const userFound = await userRepository.findOne({
-      where: { id },
-    });
-
+    const userFound = await userRepository.findOne({ where: { id } });
     if (!userFound) return [null, "Usuario no encontrado"];
 
-    const userWithSameRut = await userRepository.findOne({
-      where: { rut: body.rut },
-    });
-    if (userWithSameRut && userWithSameRut.id !== userFound.id) {
-      return [null, "Ya existe un usuario con el mismo RUT"];
+    if (body.rut && body.rut !== userFound.rut) {
+      const userWithSameRut = await userRepository.findOne({
+        where: { rut: body.rut },
+      });
+      if (userWithSameRut) {
+        return [null, "Ya existe un usuario con el mismo RUT"];
+      }
     }
 
-    const userWithSameEmail = await userRepository.findOne({
-      where: { email: body.email },
-    });
-    if (userWithSameEmail && userWithSameEmail.id !== userFound.id) {
-      return [null, "Ya existe un usuario con el mismo email"];
+    if (body.email && body.email !== userFound.email) {
+      const userWithSameEmail = await userRepository.findOne({
+        where: { email: body.email },
+      });
+      if (userWithSameEmail) {
+        return [null, "Ya existe un usuario con el mismo email"];
+      }
     }
+
 
     if (body.password) {
       const matchPassword = await comparePassword(
         body.password,
-        userFound.password,
+        userFound.password
       );
       if (!matchPassword) return [null, "La contraseña no coincide"];
     }
 
-    const dataUserUpdate = {
-      fullName: body.fullName,
-      rut: body.rut,
-      email: body.email,
-      role: body.role,
-      paymentType: body.paymentType,
-      isActive: body.isActive,
-      isMinor: body.isMinor,
-      updatedAt: new Date(),
-    };
+    const dataUserUpdate = { ...body, updatedAt: new Date() };
 
     if (body.newPassword && body.newPassword.trim() !== "") {
       dataUserUpdate.password = await encryptPassword(body.newPassword);
+      delete dataUserUpdate.newPassword;
     }
 
     await userRepository.update({ id: userFound.id }, dataUserUpdate);

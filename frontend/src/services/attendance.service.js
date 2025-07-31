@@ -15,7 +15,7 @@ function addRandomSuffix(token) {
 
 export async function obtenerResumenAsistencia(startDate, endDate) {
   try {
-    const res = await axios.get("/attendance/getAttendance", {
+    const res = await axios.get(`/attendance/getAttendance`, {
       params: { startDate, endDate },
       headers: {
         Authorization: `Bearer ${cookies.get("token") || ""}`,
@@ -30,22 +30,48 @@ export async function obtenerResumenAsistencia(startDate, endDate) {
 export async function markAttendance(date, { latitude, longitude }) {
   try {
     let deviceToken = await getDeviceToken();
-    deviceToken = addRandomSuffix(deviceToken); // agrego sufijo aleatorio para pruebas
-    console.log("El deviceToken modificado es:", deviceToken);
-    
-    const token = cookies.get("token");
-    //if (!token) throw new Error("No hay token de autenticación");
+    deviceToken = addRandomSuffix(deviceToken); // Para evitar conflictos en pruebas
 
-    const res = await axios.post(`${API_URL}/attendance/markAttendance/${date}`,
-      {
-        deviceToken,
-        latitude,
-        longitude,
-      },
-    );
+    const res = await axios.post(`/attendance/markAttendance/${date}`, {
+      deviceToken,
+      latitude,
+      longitude,
+    });
 
     return res.data;
   } catch (error) {
     throw error.response?.data?.message || "Hubo un problema al marcar asistencia.";
+  }
+}
+
+export async function getAttendancesByUserId(id) {
+  try {
+    const res = await axios.get(`/attendance/getAttendancesByUserId/${id}`);
+    return res.data.data;
+  } catch (error) {
+    throw error.response?.data?.message || "No se pudieron obtener las asistencias del usuario.";
+  }
+}
+
+export async function createManualAttendance(userId, date) {
+  try {
+    const res = await axios.post(`/attendance/markAttendanceManual`, {
+      userId,
+      date,
+    });
+    return res.data;
+  } catch (error) {
+    throw error.response?.data?.message || "No se pudo crear la asistencia manual.";
+  }
+}
+
+export async function deleteManualAttendance(userId, date) {
+  try {
+    const res = await axios.delete(`/attendance/deletemAttendance`, {
+      data: { userId, date },
+    });
+    return res.data;
+  } catch (error) {
+    throw error.response?.data?.message || "No se pudo eliminar la asistencia manual.";
   }
 }
