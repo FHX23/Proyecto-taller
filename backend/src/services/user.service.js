@@ -105,30 +105,38 @@ export async function updateUserService({ id }, body) {
   }
 }
 
-
-export async function deleteUserService(query) {
+export async function deactivateUserService({ id }) {
   try {
-    const { id, rut, email } = query;
-
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: [{ id }, { rut }, { email }],
+      where: { id },
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
 
     if (userFound.role === "administrador") {
-      return [null, "No se puede eliminar un usuario con rol de administrador"];
+      return [null, "No se puede desactivar un usuario con rol de administrador"];
     }
 
-    const userDeleted = await userRepository.remove(userFound);
+    await userRepository.update(id, {
+      isActive: false,
+      updatedAt: new Date(),
+    });
 
-    const { password, ...dataUser } = userDeleted;
+    const userUpdated = await userRepository.findOne({
+      where: { id },
+    });
+
+    if (!userUpdated) {
+      return [null, "Usuario no encontrado después de desactivar"];
+    }
+
+    const { password, ...dataUser } = userUpdated;
 
     return [dataUser, null];
   } catch (error) {
-    console.error("Error al eliminar un usuario:", error);
+    console.error("Error al desactivar un usuario:", error);
     return [null, "Error interno del servidor"];
   }
 }

@@ -1,6 +1,6 @@
 "use strict";
 import {
-  deleteUserService,
+  deactivateUserService,
   getUserService,
   getUsersService,
   updateUserService,
@@ -8,7 +8,8 @@ import {
 import {
   userBodyValidation,
   userQueryValidation,
-  userParamsValidation
+  userParamsValidation,
+  multipleUserIdsValidation
 } from "../validations/user.validation.js";
 import {
   handleErrorClient,
@@ -108,7 +109,10 @@ export async function deactivateUser(req, res) {
   try {
     const { id } = req.params;
 
-    const { error: paramsError } = userParamsValidation.validate({ id });
+    const { error: paramsError } = userParamsValidation.validate(
+      { id },
+      { abortEarly: false }
+    );
 
     if (paramsError) {
       return handleErrorClient(
@@ -119,7 +123,7 @@ export async function deactivateUser(req, res) {
       );
     }
 
-    const [userDelete, errorUserDelete] = await deleteUserService({ id });
+    const [userDelete, errorUserDelete] = await deactivateUserService({ id });
 
     if (errorUserDelete) {
       return handleErrorClient(res, 404, "Error al desactivar el usuario", errorUserDelete);

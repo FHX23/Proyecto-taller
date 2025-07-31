@@ -18,7 +18,7 @@ router
 router
   .get("/getUser/:id", getUser)
   .get("/getUsers", getUsers)
-  .put("/updateUser/:id", updateUser);
-  
+  .put("/updateUser/:id", updateUser)
+  .patch("/deactivateUser/:id", deactivateUser);
 
 export default router;

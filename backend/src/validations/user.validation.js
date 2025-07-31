@@ -22,8 +22,6 @@ export const userParamsValidation = Joi.object({
     })
 })
 
-
-
 export const userBodyValidation = Joi.object({
   fullName: Joi.string() 
     .min(15)
@@ -118,7 +116,28 @@ export const userBodyValidation = Joi.object({
     "object.missing": "Debes proporcionar al menos un campo para actualizar.",
   });
 
-
+export const multipleUserIdsValidation = Joi.object({
+  ids: Joi.array()
+    .items(
+      Joi.number()
+        .integer()
+        .positive()
+        .required()
+        .messages({
+          "number.base": "Cada id debe ser un número",
+          "number.integer": "Cada id debe ser un número entero",
+          "number.positive": "Cada id debe ser un número positivo",
+          "any.required": "Cada id es requerido",
+        })
+    )
+    .min(1)
+    .required()
+    .messages({
+      "array.base": "Se requiere un array de IDs",
+      "array.min": "Debe haber al menos un ID",
+      "any.required": "El campo 'ids' es requerido",
+    }),
+});
 
 
 
