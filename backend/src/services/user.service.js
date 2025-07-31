@@ -3,14 +3,12 @@ import User from "../entity/user.entity.js";
 import { AppDataSource } from "../config/config.Db.js";
 import { comparePassword, encryptPassword } from "../helpers/bcrypt.helper.js";
 
-export async function getUserService(query) {
+export async function getUserService({ id }) {
   try {
-    const { rut, id, email } = query;
-
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: [{ id }, { rut }, { email }],
+      where: { id },
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
@@ -41,27 +39,28 @@ export async function getUsersService() {
   }
 }
 
-export async function updateUserService(query, body) {
+export async function updateUserService({ id }, body) {
   try {
-    const { id, rut, email } = query;
-
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: [{ id }, { rut }, { email }],
+      where: { id },
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
 
-    const existingUser = await userRepository.findOne({
-      where: [
-        { rut: body.rut },
-        { email: body.email }
-      ],
+    const userWithSameRut = await userRepository.findOne({
+      where: { rut: body.rut },
     });
+    if (userWithSameRut && userWithSameRut.id !== userFound.id) {
+      return [null, "Ya existe un usuario con el mismo RUT"];
+    }
 
-    if (existingUser && existingUser.id !== userFound.id) {
-      return [null, "Ya existe un usuario con el mismo rut o email"];
+    const userWithSameEmail = await userRepository.findOne({
+      where: { email: body.email },
+    });
+    if (userWithSameEmail && userWithSameEmail.id !== userFound.id) {
+      return [null, "Ya existe un usuario con el mismo email"];
     }
 
     if (body.password) {
@@ -69,12 +68,11 @@ export async function updateUserService(query, body) {
         body.password,
         userFound.password,
       );
-
       if (!matchPassword) return [null, "La contraseña no coincide"];
     }
 
     const dataUserUpdate = {
-      fullName: body.fullName,           
+      fullName: body.fullName,
       rut: body.rut,
       email: body.email,
       role: body.role,
@@ -106,6 +104,7 @@ export async function updateUserService(query, body) {
     return [null, "Error interno del servidor"];
   }
 }
+
 
 export async function deleteUserService(query) {
   try {

@@ -16,7 +16,7 @@ import QRPage from "./pages/protected/Scanner";
 import QRDisplayPage from "./pages/protected/QRDisplayPage";
 import AttendancePage from "./pages/protected/TableAttendance";
 import CalendarWorkday from "./pages/protected/CalendarWorkday";
-
+import DashboardEmployees from "./pages/protected/DashboardEmployees";
 const AppRouter = () => {
   return (
     <Routes>
@@ -42,6 +42,7 @@ const AppRouter = () => {
         <Route path="/qr_display" element={<QRDisplayPage />} />
         <Route path="/table_attendance" element={<AttendancePage />} />
         <Route path="/workdays" element={<CalendarWorkday />} />
+        <Route path="/dashboard_employees" element={<DashboardEmployees/>} />
         {/* Agrega más rutas protegidas aquí */}
         
       </Route>

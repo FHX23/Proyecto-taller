@@ -13,16 +13,6 @@ export async function getUsers() {
   }
 }
 
-export async function updateUser(data, rut) {
-  try {
-    const response = await axios.patch(`/user/detail/?rut=${rut}`, data);
-    console.log(response);
-    return response.data.data;
-  } catch (error) {
-    console.log(error);
-    return error.response.data;
-  }
-}
 
 export async function deleteUser(id) {
   try {
@@ -58,11 +48,11 @@ export async function GetUsersFilter(filters) {
   }
 }
 
-export async function updateUserService2(id, updateData) {
+export async function updateUser(id, updateData) {
   try {
     // Realizar la solicitud PUT a la API
     const response = await axios.put(
-      `${API_URL}/user/updateUser2/${id}`,
+      `${API_URL}/user/updateUser/${id}`,
       updateData
     );
 

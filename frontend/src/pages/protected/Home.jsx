@@ -45,6 +45,14 @@ const Home = () => {
           <Calendar className="w-5 h-5" />
           <span>Ver calendario</span>
         </Button>
+        <Button
+          variant="outline"
+          onClick={() => navigate("/dashboard_employees")}
+          className="flex items-center justify-center gap-2 py-3"
+        >
+          <Calendar className="w-5 h-5" />
+          <span>Gestion empleados</span>
+        </Button>
       </div>
     </div>
   </div>
