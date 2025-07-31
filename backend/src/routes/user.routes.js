@@ -7,6 +7,7 @@ import {
   getUsers,
   updateUser,
   deactivateUser,
+  deactivateUsers,
 } from "../controllers/user.controller.js";
 
 const router = Router();
@@ -19,6 +20,6 @@ router
   .get("/getUser/:id", getUser)
   .get("/getUsers", getUsers)
   .put("/updateUser/:id", updateUser)
-  .patch("/deactivateUser/:id", deactivateUser);
-
+  .patch("/deactivateUser/:id", deactivateUser)
+  .patch("/deactivateUsers", deactivateUsers);
 export default router;

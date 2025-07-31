@@ -134,3 +134,33 @@ export async function deactivateUser(req, res) {
     handleErrorServer(res, 500, error.message);
   }
 }
+
+export async function deactivateUsers(req, res) {
+  try {
+    const { ids } = req.body;
+
+    const { error: bodyError } = multipleUserIdsValidation.validate(
+      { ids },
+      { abortEarly: false }
+    );
+
+    if (bodyError) {
+      return handleErrorClient(
+        res,
+        400,
+        "Error en los IDs enviados",
+        bodyError.message
+      );
+    }
+
+    const results = [];
+    for (const id of ids) {
+      const [user, error] = await deactivateUserService({ id });
+      results.push({ id, success: !error, message: error || "Desactivado correctamente" });
+    }
+
+    return handleSuccess(res, 200, "Resultado de desactivación múltiple", results);
+  } catch (error) {
+    handleErrorServer(res, 500, error.message);
+  }
+}
