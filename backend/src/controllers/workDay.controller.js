@@ -7,6 +7,7 @@ import {
 import { createTodayWorkdayService } from "../services/workDay.service.js";
 import { createManualWorkdayService } from "../services/workDay.service.js";
 import { getAllWorkdaysService } from "../services/workDay.service.js";
+import { updateWorkdayService } from "../services/workDay.service.js";
 export async function createTodayWorkdayController(req, res) {
   try {
     const [result, error] = await createTodayWorkdayService();
@@ -47,6 +48,28 @@ export async function getAllWorkdaysController(req, res) {
     const [result, error] = await getAllWorkdaysService();
     if (error) return handleErrorServer(res, 500, error);
     handleSuccess(res, 200, "Workdays obtenidos exitosamente", result);
+  } catch (err) {
+    handleErrorServer(res, 500, err.message);
+  }
+}
+
+export async function updateWorkday(req, res) {
+  try {
+    const { date, isWorkingDay, payAmount } = req.body;
+
+    if (!date) {
+      return handleErrorClient(res, 400, "La fecha es obligatoria para modificar un Workday.");
+    }
+
+    const [updatedWorkday, error] = await updateWorkdayService({
+      date,
+      isWorkingDay,
+      payAmount,
+    });
+
+    if (error) return handleErrorClient(res, 400, error);
+
+    handleSuccess(res, 200, "Workday actualizado correctamente", updatedWorkday);
   } catch (err) {
     handleErrorServer(res, 500, err.message);
   }

@@ -20,3 +20,12 @@ export async function createWorkdayManual(data) {
     throw error.response?.data?.message || "Error al crear workday manual";
   }
 }
+
+export async function updateWorkday(data) {
+  try {
+    const res = await axios.patch("/workday/updateWorkday", data);
+    return res.data;
+  } catch (error) {
+    throw error.response?.data?.message || "Error al actualizar el día laboral";
+  }
+}
