@@ -39,6 +39,8 @@ import {
   updateUser,
   deactivateUser,
   deactivateUsers,
+  activateUser,
+  activateUsers,
 } from "@/services/user.service";
 import {
   getAttendancesByUserId,
@@ -52,15 +54,14 @@ import 'dayjs/locale/es';
 // Configura dayjs para usar el idioma español globalmente
 dayjs.locale('es');
 
-// --- Componente de Calendario (con Diálogo de Confirmación) ---
+// --- Componente de Calendario ---
 const UserCalendar = ({ userId, userName }) => {
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [attendances, setAttendances] = useState(new Set());
   const [workdays, setWorkdays] = useState(new Map());
   const [loading, setLoading] = useState(false);
-  const [confirmation, setConfirmation] = useState(null); // Estado para el diálogo
+  const [confirmation, setConfirmation] = useState(null);
 
-  // Carga los datos del calendario (asistencias y días laborales)
   const fetchCalendarData = async () => {
     setLoading(true);
     try {
@@ -83,45 +84,34 @@ const UserCalendar = ({ userId, userName }) => {
     fetchCalendarData();
   }, [userId, currentDate]);
 
-  // Prepara la confirmación cuando se hace clic en un día
   const handleDayClick = (day) => {
     const dateStr = day.format('YYYY-MM-DD');
     if (!workdays.has(dateStr) || day.isAfter(dayjs(), 'day')) {
       return;
     }
     const hasAttendance = attendances.has(dateStr);
-    setConfirmation({
-      day,
-      dateStr,
-      hasAttendance,
-      userId, // Pasamos el userId a la confirmación
-    });
+    setConfirmation({ day, dateStr, hasAttendance, userId });
   };
 
-  // Ejecuta la acción después de que el usuario confirma en el diálogo
   const executeConfirmation = async () => {
     if (!confirmation) return;
     const { userId, dateStr, hasAttendance } = confirmation;
-    
-    // Define la acción a ejecutar
     const promiseAction = () => hasAttendance
       ? deleteManualAttendance(userId, dateStr)
       : createManualAttendance(userId, dateStr);
 
-    // Muestra un toast de "cargando" mientras se ejecuta la promesa
     const promise = promiseAction();
     toast.promise(promise, {
       loading: "Actualizando asistencia...",
       success: () => {
-        fetchCalendarData(); // Recarga los datos
-        setConfirmation(null); // Cierra el diálogo
+        fetchCalendarData();
+        setConfirmation(null);
         return "Asistencia actualizada correctamente.";
       },
       error: (err) => `Error: ${err}`,
     });
   };
 
-  // Lógica para generar los días del mes en el calendario
   const startOfMonth = currentDate.startOf('month');
   const endOfMonth = currentDate.endOf('month');
   const daysInMonth = [];
@@ -140,32 +130,34 @@ const UserCalendar = ({ userId, userName }) => {
           <DialogTitle>Calendario de {userName}</DialogTitle>
         </DialogHeader>
         <div className="flex justify-between items-center mb-4">
-          <Button variant="outline" onClick={() => setCurrentDate(currentDate.subtract(1, 'month'))}>Anterior</Button>
-          <h3 className="text-lg font-semibold capitalize">{currentDate.format('MMMM YYYY')}</h3>
-          <Button variant="outline" onClick={() => setCurrentDate(currentDate.add(1, 'month'))}>Siguiente</Button>
+          <Button variant="outline" onClick={() => setCurrentDate(currentDate.subtract(1, 'month'))}>
+            Anterior
+          </Button>
+          <h3 className="text-lg font-semibold capitalize">
+            {currentDate.format('MMMM YYYY')}
+          </h3>
+          <Button variant="outline" onClick={() => setCurrentDate(currentDate.add(1, 'month'))}>
+            Siguiente
+          </Button>
         </div>
         {loading ? (
           <div className="text-center py-8">Cargando datos del calendario...</div>
         ) : (
           <div className="grid grid-cols-7 gap-2 text-center">
-            {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => <div key={d} className="font-bold text-sm text-muted-foreground">{d}</div>)}
+            {['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => (
+              <div key={d} className="font-bold text-sm text-muted-foreground">{d}</div>
+            ))}
             {paddingDays.map((_, i) => <div key={`pad-${i}`} />)}
             {daysInMonth.map((d) => {
               const dateStr = d.format('YYYY-MM-DD');
               const isWorkday = workdays.has(dateStr);
               const hasAttendance = attendances.has(dateStr);
-              let dayClass = 'bg-gray-200 text-gray-500'; // Estilo por defecto: día no laboral
+              let dayClass = 'bg-gray-200 text-gray-500';
               if (isWorkday) {
                 dayClass = hasAttendance ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-red-500 text-white hover:bg-red-600';
               }
-              
               const isDisabled = d.isAfter(dayjs(), 'day') || !isWorkday;
-              if (isDisabled) {
-                dayClass += ' opacity-50 cursor-not-allowed';
-              } else {
-                dayClass += ' cursor-pointer';
-              }
-
+              dayClass += isDisabled ? ' opacity-50 cursor-not-allowed' : ' cursor-pointer';
               return (
                 <button
                   key={dateStr}
@@ -180,15 +172,14 @@ const UserCalendar = ({ userId, userName }) => {
           </div>
         )}
       </div>
-
-      {/* Diálogo de Confirmación para el calendario */}
       <Dialog open={!!confirmation} onOpenChange={() => setConfirmation(null)}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Confirmar Cambio de Asistencia</DialogTitle>
             <DialogDescription className="pt-2">
               ¿Estás seguro de que quieres cambiar la asistencia a "
-              <strong>{confirmation?.hasAttendance ? 'ausente' : 'presente'}</strong>" para el día
+              <strong>{confirmation?.hasAttendance ? 'ausente' : 'presente'}</strong>
+              " para el día
               <strong> {confirmation?.day.format('D [de] MMMM [de] YYYY')}</strong>?
             </DialogDescription>
           </DialogHeader>
@@ -213,6 +204,8 @@ const DashboardEmployees = () => {
   const [calendarUser, setCalendarUser] = useState(null);
   const [showCalendarDialog, setShowCalendarDialog] = useState(false);
   const [editForm, setEditForm] = useState({ fullName: "", rut: "", email: "", isMinor: false, paymentType: null });
+  const [showDeactivated, setShowDeactivated] = useState(false);
+  const [actionConfirmation, setActionConfirmation] = useState(null);
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -233,11 +226,11 @@ const DashboardEmployees = () => {
   const filteredUsers = useMemo(() =>
     users.filter(
       (u) =>
-        u.isActive !== false &&
+        (showDeactivated ? u.isActive === false : u.isActive !== false) &&
         (u.fullName.toLowerCase().includes(search.toLowerCase()) ||
          u.email.toLowerCase().includes(search.toLowerCase()) ||
          u.rut.toLowerCase().includes(search.toLowerCase()))
-    ), [users, search]);
+    ), [users, search, showDeactivated]);
 
   const toggleUserSelection = (userId) => {
     setSelectedUsers((prev) =>
@@ -254,103 +247,63 @@ const DashboardEmployees = () => {
     }
   };
 
-  const handleDeleteSelected = () => {
-    toast("¿Estás seguro de que quieres desactivar las cuentas seleccionadas?", {
-      action: {
-        label: "Confirmar",
-        onClick: async () => {
-          const promise = deactivateUsers(selectedUsers);
-          toast.promise(promise, {
-            loading: "Desactivando usuarios...",
-            success: () => {
-              fetchUsers();
-              setSelectedUsers([]);
-              return "Usuarios desactivados correctamente.";
-            },
-            error: (err) => `Error: ${err}`,
-          });
-        },
+  const handleToggleView = () => {
+    setSelectedUsers([]); // Limpia la selección al cambiar de vista
+    setShowDeactivated(prev => !prev);
+  };
+
+  const requestActionConfirmation = (action, ids) => {
+    if (ids.length === 0) return;
+    setActionConfirmation({ action, ids });
+  };
+
+  const executeActionConfirmation = () => {
+    if (!actionConfirmation) return;
+    const { action, ids } = actionConfirmation;
+    const isBulk = ids.length > 1;
+    let promise;
+    if (action === 'activate') {
+      promise = isBulk ? activateUsers(ids) : activateUser(ids[0]);
+    } else {
+      promise = isBulk ? deactivateUsers(ids) : deactivateUser(ids[0]);
+    }
+    
+    toast.promise(promise, {
+      loading: `${action === 'activate' ? 'Activando' : 'Desactivando'} usuario(s)...`,
+      success: () => {
+        fetchUsers();
+        setSelectedUsers([]);
+        setActionConfirmation(null);
+        return `Usuario(s) ${action === 'activate' ? 'activados' : 'desactivados'} correctamente.`;
       },
-      cancel: {
-        label: "Cancelar",
-      },
+      error: (err) => `Error: ${err}`,
     });
   };
-  
+
   const handleEditUser = (userId) => {
     const user = users.find((u) => u.id === userId);
     if (user) {
       setEditingUser(user);
-      setEditForm({
-        fullName: user.fullName || "",
-        rut: user.rut || "",
-        email: user.email || "",
-        paymentType: user.paymentType || null,
-        isMinor: user.isMinor || false,
-      });
+      setEditForm({ fullName: user.fullName || "", rut: user.rut || "", email: user.email || "", paymentType: user.paymentType || null, isMinor: user.isMinor || false });
       setShowEditDialog(true);
     }
   };
 
   const handleViewCalendar = (userId) => {
     const user = users.find((u) => u.id === userId);
-    if (user) {
-      setCalendarUser(user);
-      setShowCalendarDialog(true);
-    }
-  };
-
-  const handleDeleteUser = (userId) => {
-     toast("¿Estás seguro de que quieres desactivar esta cuenta?", {
-      action: {
-        label: "Confirmar",
-        onClick: async () => {
-           const promise = deactivateUser(userId);
-           toast.promise(promise, {
-             loading: "Desactivando usuario...",
-             success: () => {
-               fetchUsers();
-               return "Usuario desactivado correctamente.";
-             },
-             error: (err) => `Error: ${err}`,
-           });
-        },
-      },
-      cancel: {
-        label: "Cancelar",
-      },
-    });
-  };
-
-  const handleEditFormChange = (field, value) => {
-    setEditForm((prev) => ({ ...prev, [field]: value }));
+    if (user) { setCalendarUser(user); setShowCalendarDialog(true); }
   };
 
   const handleSaveChanges = async () => {
     if (!editingUser) return;
     const changes = {};
-    Object.keys(editForm).forEach(key => {
-        if (editForm[key] !== editingUser[key]) {
-            changes[key] = editForm[key];
-        }
-    });
-    if (changes.paymentType === null) {
-        toast.error("Debe seleccionar un tipo de pago.");
-        return;
-    }
-    if (Object.keys(changes).length === 0) {
-        toast.info("No se han realizado cambios.");
-        setShowEditDialog(false);
-        return;
-    }
+    Object.keys(editForm).forEach(key => { if (editForm[key] !== editingUser[key]) { changes[key] = editForm[key]; } });
+    if (changes.paymentType === null) { toast.error("Debe seleccionar un tipo de pago."); return; }
+    if (Object.keys(changes).length === 0) { toast.info("No se han realizado cambios."); setShowEditDialog(false); return; }
     const promise = updateUser(editingUser.id, changes);
     toast.promise(promise, {
       loading: "Guardando cambios...",
-      success: () => {
-        setShowEditDialog(false);
-        fetchUsers();
-        return "Usuario actualizado correctamente.";
-      },
+      success: () => { setShowEditDialog(false); fetchUsers(); return "Usuario actualizado correctamente."; },
       error: (err) => `Error al guardar: ${err}`,
     });
   };
@@ -365,11 +318,20 @@ const DashboardEmployees = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex flex-col sm:flex-row sm:justify-between gap-4 items-center">
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <Checkbox checked={allFilteredSelected} onCheckedChange={toggleAllUsersSelection} id="select-all"/>
-              <Label htmlFor="select-all" className="text-sm text-muted-foreground cursor-pointer">
-                Seleccionar todos
-              </Label>
+            <div className="flex items-center gap-4 w-full sm:w-auto">
+              <div className="flex items-center gap-2">
+                <Checkbox
+                  checked={allFilteredSelected}
+                  onCheckedChange={toggleAllUsersSelection}
+                  id="select-all"
+                />
+                <Label htmlFor="select-all" className="text-sm text-muted-foreground cursor-pointer">
+                  Seleccionar todos
+                </Label>
+              </div>
+              <Button variant="outline" size="sm" onClick={handleToggleView}>
+                {showDeactivated ? 'Ver Activos' : 'Ver Desactivados'}
+              </Button>
             </div>
             <Input
               placeholder="Buscar por nombre, email o RUT..."
@@ -378,12 +340,15 @@ const DashboardEmployees = () => {
               className="w-full sm:w-1/2"
             />
             <Button
-              variant="destructive"
               disabled={selectedUsers.length === 0}
-              onClick={handleDeleteSelected}
-              className="w-full sm:w-auto"
+              onClick={() => requestActionConfirmation(showDeactivated ? 'activate' : 'deactivate', selectedUsers)}
+              className={`w-full sm:w-auto ${
+                showDeactivated
+                  ? 'bg-green-500 text-white hover:bg-green-600'
+                  : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+              }`}
             >
-              🗑️ Desactivar Seleccionados
+              {showDeactivated ? '✅ Activar Seleccionados' : '🗑️ Desactivar Seleccionados'}
             </Button>
           </div>
           <div className="overflow-x-auto">
@@ -399,17 +364,9 @@ const DashboardEmployees = () => {
               </TableHeader>
               <TableBody>
                 {loading ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      Cargando empleados...
-                    </TableCell>
-                  </TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center py-8">Cargando empleados...</TableCell></TableRow>
                 ) : filteredUsers.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={5} className="text-center py-8">
-                      No se encontraron empleados.
-                    </TableCell>
-                  </TableRow>
+                  <TableRow><TableCell colSpan={5} className="text-center py-8">No se encontraron empleados.</TableCell></TableRow>
                 ) : (
                   filteredUsers.map((user) => (
                     <TableRow key={user.id}>
@@ -429,8 +386,15 @@ const DashboardEmployees = () => {
                         <Button variant="outline" size="sm" onClick={() => handleViewCalendar(user.id)}>
                           📅 Calendario
                         </Button>
-                        <Button variant="destructive" size="sm" onClick={() => handleDeleteUser(user.id)}>
-                          🗑️ Desactivar
+                        <Button
+                          size="sm"
+                          onClick={() => requestActionConfirmation(showDeactivated ? 'activate' : 'deactivate', [user.id])}
+                          className={showDeactivated
+                            ? 'bg-green-500 text-white hover:bg-green-600'
+                            : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                          }
+                        >
+                          {showDeactivated ? '✅ Activar' : '🗑️ Desactivar'}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -442,55 +406,67 @@ const DashboardEmployees = () => {
         </CardContent>
       </Card>
 
-      {/* --- Diálogo de Edición --- */}
       <Dialog open={showEditDialog} onOpenChange={setShowEditDialog}>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Editar Usuario</DialogTitle>
-          </DialogHeader>
+          <DialogHeader><DialogTitle>Editar Usuario</DialogTitle></DialogHeader>
           <div className="space-y-4 py-4">
             <div>
               <Label htmlFor="fullName">Nombre completo</Label>
-              <Input id="fullName" value={editForm.fullName} onChange={(e) => handleEditFormChange("fullName", e.target.value)} className="mt-1" />
+              <Input id="fullName" value={editForm.fullName} onChange={(e) => setEditForm(prev => ({...prev, fullName: e.target.value}))} className="mt-1" />
             </div>
             <div>
               <Label htmlFor="rut">RUT</Label>
-              <Input id="rut" value={editForm.rut} onChange={(e) => handleEditFormChange("rut", e.target.value)} className="mt-1" />
+              <Input id="rut" value={editForm.rut} onChange={(e) => setEditForm(prev => ({...prev, rut: e.target.value}))} className="mt-1" />
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" value={editForm.email} onChange={(e) => handleEditFormChange("email", e.target.value)} className="mt-1" />
+              <Input id="email" type="email" value={editForm.email} onChange={(e) => setEditForm(prev => ({...prev, email: e.target.value}))} className="mt-1" />
             </div>
             <div>
               <Label htmlFor="paymentType">Tipo de pago</Label>
-                <Select value={editForm.paymentType || ""} onValueChange={(value) => handleEditFormChange("paymentType", value)}>
-                    <SelectTrigger className="w-full mt-1">
-                        <SelectValue placeholder="Seleccionar tipo..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                        <SelectItem value="transferencia">Transferencia</SelectItem>
-                        <SelectItem value="efectivo">Efectivo</SelectItem>
-                    </SelectContent>
-                </Select>
+              <Select value={editForm.paymentType || ""} onValueChange={(value) => setEditForm(prev => ({...prev, paymentType: value}))}>
+                <SelectTrigger className="w-full mt-1"><SelectValue placeholder="Seleccionar tipo..." /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="transferencia">Transferencia</SelectItem>
+                  <SelectItem value="efectivo">Efectivo</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex items-center space-x-2 pt-2">
-              <Checkbox id="isMinor" checked={editForm.isMinor} onCheckedChange={(val) => handleEditFormChange("isMinor", val)} />
+              <Checkbox id="isMinor" checked={editForm.isMinor} onCheckedChange={(val) => setEditForm(prev => ({...prev, isMinor: val}))} />
               <Label htmlFor="isMinor" className="cursor-pointer">Es menor de edad</Label>
             </div>
           </div>
           <DialogFooter>
-            <DialogClose asChild>
-              <Button type="button" variant="secondary">Cancelar</Button>
-            </DialogClose>
+            <DialogClose asChild><Button type="button" variant="secondary">Cancelar</Button></DialogClose>
             <Button onClick={handleSaveChanges}>Guardar Cambios</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* --- Diálogo de Calendario --- */}
+      
       <Dialog open={showCalendarDialog} onOpenChange={setShowCalendarDialog}>
         <DialogContent className="sm:max-w-lg">
           {calendarUser && <UserCalendar userId={calendarUser.id} userName={calendarUser.fullName} />}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!actionConfirmation} onOpenChange={() => setActionConfirmation(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar Acción</DialogTitle>
+            <DialogDescription className="pt-2">
+              ¿Estás seguro de que quieres <strong>{actionConfirmation?.action === 'activate' ? 'activar' : 'desactivar'}</strong> {actionConfirmation?.ids.length} usuario(s) seleccionado(s)?
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="secondary" onClick={() => setActionConfirmation(null)}>Cancelar</Button>
+            <Button
+              onClick={executeActionConfirmation}
+              className={actionConfirmation?.action === 'activate' ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'}
+            >
+              Confirmar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
