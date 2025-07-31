@@ -69,9 +69,13 @@ const UserCalendar = ({ userId, userName }) => {
         getAttendancesByUserId(userId),
         getAllWorkdays()
       ]);
-      const attendanceSet = new Set(attendanceData.map(att => dayjs(att.workday.date).format('YYYY-MM-DD')));
+      const attendanceSet = new Set(
+        attendanceData.map(att => dayjs(att.workday.date).format('YYYY-MM-DD'))
+      );
       setAttendances(attendanceSet);
-      const workdayMap = new Map(workdayData.map(wd => [dayjs(wd.date).format('YYYY-MM-DD'), wd]));
+      const workdayMap = new Map(
+        workdayData.map(wd => [dayjs(wd.date).format('YYYY-MM-DD'), wd])
+      );
       setWorkdays(workdayMap);
     } catch (error) {
       toast.error("Error al cargar datos del calendario: " + error);
@@ -154,7 +158,9 @@ const UserCalendar = ({ userId, userName }) => {
               const hasAttendance = attendances.has(dateStr);
               let dayClass = 'bg-gray-200 text-gray-500';
               if (isWorkday) {
-                dayClass = hasAttendance ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-red-500 text-white hover:bg-red-600';
+                dayClass = hasAttendance
+                  ? 'bg-green-500 text-white hover:bg-green-600'
+                  : 'bg-red-500 text-white hover:bg-red-600';
               }
               const isDisabled = d.isAfter(dayjs(), 'day') || !isWorkday;
               dayClass += isDisabled ? ' opacity-50 cursor-not-allowed' : ' cursor-pointer';
@@ -206,6 +212,8 @@ const DashboardEmployees = () => {
   const [editForm, setEditForm] = useState({ fullName: "", rut: "", email: "", isMinor: false, paymentType: null });
   const [showDeactivated, setShowDeactivated] = useState(false);
   const [actionConfirmation, setActionConfirmation] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 30;
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -224,13 +232,30 @@ const DashboardEmployees = () => {
   }, []);
 
   const filteredUsers = useMemo(() =>
-    users.filter(
-      (u) =>
-        (showDeactivated ? u.isActive === false : u.isActive !== false) &&
-        (u.fullName.toLowerCase().includes(search.toLowerCase()) ||
-         u.email.toLowerCase().includes(search.toLowerCase()) ||
-         u.rut.toLowerCase().includes(search.toLowerCase()))
-    ), [users, search, showDeactivated]);
+    users.filter((u) => {
+      const matchesStatus = showDeactivated ? u.isActive === false : u.isActive !== false;
+      const matchesSearch =
+        u.fullName.toLowerCase().includes(search.toLowerCase()) ||
+        u.email.toLowerCase().includes(search.toLowerCase()) ||
+        u.rut.toLowerCase().includes(search.toLowerCase());
+      return matchesStatus && matchesSearch;
+    }),
+    [users, search, showDeactivated]
+  );
+
+  const paginatedUsers = useMemo(() => {
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+    return filteredUsers.slice(indexOfFirstItem, indexOfLastItem);
+  }, [filteredUsers, currentPage, itemsPerPage]);
+
+  const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
+
+  const handleToggleView = () => {
+    setSelectedUsers([]);
+    setCurrentPage(1); // Resetea a la primera página
+    setShowDeactivated(prev => !prev);
+  };
 
   const toggleUserSelection = (userId) => {
     setSelectedUsers((prev) =>
@@ -245,11 +270,6 @@ const DashboardEmployees = () => {
     } else {
       setSelectedUsers((prev) => Array.from(new Set([...prev, ...allFilteredIds])));
     }
-  };
-
-  const handleToggleView = () => {
-    setSelectedUsers([]); // Limpia la selección al cambiar de vista
-    setShowDeactivated(prev => !prev);
   };
 
   const requestActionConfirmation = (action, ids) => {
@@ -284,26 +304,50 @@ const DashboardEmployees = () => {
     const user = users.find((u) => u.id === userId);
     if (user) {
       setEditingUser(user);
-      setEditForm({ fullName: user.fullName || "", rut: user.rut || "", email: user.email || "", paymentType: user.paymentType || null, isMinor: user.isMinor || false });
+      setEditForm({
+        fullName: user.fullName || "",
+        rut: user.rut || "",
+        email: user.email || "",
+        paymentType: user.paymentType || null,
+        isMinor: user.isMinor || false
+      });
       setShowEditDialog(true);
     }
   };
 
   const handleViewCalendar = (userId) => {
     const user = users.find((u) => u.id === userId);
-    if (user) { setCalendarUser(user); setShowCalendarDialog(true); }
+    if (user) {
+      setCalendarUser(user);
+      setShowCalendarDialog(true);
+    }
   };
 
   const handleSaveChanges = async () => {
     if (!editingUser) return;
     const changes = {};
-    Object.keys(editForm).forEach(key => { if (editForm[key] !== editingUser[key]) { changes[key] = editForm[key]; } });
-    if (changes.paymentType === null) { toast.error("Debe seleccionar un tipo de pago."); return; }
-    if (Object.keys(changes).length === 0) { toast.info("No se han realizado cambios."); setShowEditDialog(false); return; }
+    Object.keys(editForm).forEach(key => {
+      if (editForm[key] !== editingUser[key]) {
+        changes[key] = editForm[key];
+      }
+    });
+    if (changes.paymentType === null) {
+      toast.error("Debe seleccionar un tipo de pago.");
+      return;
+    }
+    if (Object.keys(changes).length === 0) {
+      toast.info("No se han realizado cambios.");
+      setShowEditDialog(false);
+      return;
+    }
     const promise = updateUser(editingUser.id, changes);
     toast.promise(promise, {
       loading: "Guardando cambios...",
-      success: () => { setShowEditDialog(false); fetchUsers(); return "Usuario actualizado correctamente."; },
+      success: () => {
+        setShowEditDialog(false);
+        fetchUsers();
+        return "Usuario actualizado correctamente.";
+      },
       error: (err) => `Error al guardar: ${err}`,
     });
   };
@@ -345,10 +389,10 @@ const DashboardEmployees = () => {
               className={`w-full sm:w-auto ${
                 showDeactivated
                   ? 'bg-green-500 text-white hover:bg-green-600'
-                  : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                  : 'bg-red-600 text-white hover:bg-red-700'
               }`}
             >
-              {showDeactivated ? '✅ Activar Seleccionados' : '🗑️ Desactivar Seleccionados'}
+              {showDeactivated ? 'Activar Seleccionados' : 'Desactivar Seleccionados'}
             </Button>
           </div>
           <div className="overflow-x-auto">
@@ -365,10 +409,10 @@ const DashboardEmployees = () => {
               <TableBody>
                 {loading ? (
                   <TableRow><TableCell colSpan={5} className="text-center py-8">Cargando empleados...</TableCell></TableRow>
-                ) : filteredUsers.length === 0 ? (
+                ) : paginatedUsers.length === 0 ? (
                   <TableRow><TableCell colSpan={5} className="text-center py-8">No se encontraron empleados.</TableCell></TableRow>
                 ) : (
-                  filteredUsers.map((user) => (
+                  paginatedUsers.map((user) => (
                     <TableRow key={user.id}>
                       <TableCell>
                         <Checkbox
@@ -380,21 +424,21 @@ const DashboardEmployees = () => {
                       <TableCell>{user.rut}</TableCell>
                       <TableCell>{user.email}</TableCell>
                       <TableCell className="text-center space-x-2">
-                        <Button variant="secondary" size="sm" onClick={() => handleEditUser(user.id)}>
-                          ✏️ Editar
+                        <Button variant="outline" size="sm" onClick={() => handleEditUser(user.id)}>
+                          Editar
                         </Button>
                         <Button variant="outline" size="sm" onClick={() => handleViewCalendar(user.id)}>
-                          📅 Calendario
+                          Calendario
                         </Button>
                         <Button
                           size="sm"
                           onClick={() => requestActionConfirmation(showDeactivated ? 'activate' : 'deactivate', [user.id])}
                           className={showDeactivated
                             ? 'bg-green-500 text-white hover:bg-green-600'
-                            : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'
+                            : 'bg-red-600 text-white hover:bg-red-700'
                           }
                         >
-                          {showDeactivated ? '✅ Activar' : '🗑️ Desactivar'}
+                          {showDeactivated ? 'Activar' : 'Desactivar'}
                         </Button>
                       </TableCell>
                     </TableRow>
@@ -403,6 +447,29 @@ const DashboardEmployees = () => {
               </TableBody>
             </Table>
           </div>
+          {totalPages > 1 && (
+            <div className="flex justify-center items-center space-x-2 pt-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+              >
+                Anterior
+              </Button>
+              <span className="text-sm text-muted-foreground">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                disabled={currentPage === totalPages}
+              >
+                Siguiente
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
 
@@ -462,7 +529,10 @@ const DashboardEmployees = () => {
             <Button variant="secondary" onClick={() => setActionConfirmation(null)}>Cancelar</Button>
             <Button
               onClick={executeActionConfirmation}
-              className={actionConfirmation?.action === 'activate' ? 'bg-green-500 text-white hover:bg-green-600' : 'bg-destructive text-destructive-foreground hover:bg-destructive/90'}
+              className={actionConfirmation?.action === 'activate'
+                ? 'bg-green-500 text-white hover:bg-green-600'
+                : 'bg-red-600 text-white hover:bg-red-700'
+              }
             >
               Confirmar
             </Button>
