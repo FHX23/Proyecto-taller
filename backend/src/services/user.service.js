@@ -2,15 +2,14 @@
 import User from "../entity/user.entity.js";
 import { AppDataSource } from "../config/config.Db.js";
 import { comparePassword, encryptPassword } from "../helpers/bcrypt.helper.js";
+import { Not } from "typeorm";
 
-export async function getUserService(query) {
+export async function getUserService({ id }) {
   try {
-    const { rut, id, email } = query;
-
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: [{ id }, { rut }, { email }],
+      where: { id },
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
@@ -41,51 +40,45 @@ export async function getUsersService() {
   }
 }
 
-export async function updateUserService(query, body) {
+export async function updateUserService({ id }, body) {
   try {
-    const { id, rut, email } = query;
-
     const userRepository = AppDataSource.getRepository(User);
 
-    const userFound = await userRepository.findOne({
-      where: [{ id }, { rut }, { email }],
-    });
-
+    const userFound = await userRepository.findOne({ where: { id } });
     if (!userFound) return [null, "Usuario no encontrado"];
 
-    const existingUser = await userRepository.findOne({
-      where: [
-        { rut: body.rut },
-        { email: body.email }
-      ],
-    });
-
-    if (existingUser && existingUser.id !== userFound.id) {
-      return [null, "Ya existe un usuario con el mismo rut o email"];
+    if (body.rut && body.rut !== userFound.rut) {
+      const userWithSameRut = await userRepository.findOne({
+        where: { rut: body.rut },
+      });
+      if (userWithSameRut) {
+        return [null, "Ya existe un usuario con el mismo RUT"];
+      }
     }
+
+    if (body.email && body.email !== userFound.email) {
+      const userWithSameEmail = await userRepository.findOne({
+        where: { email: body.email },
+      });
+      if (userWithSameEmail) {
+        return [null, "Ya existe un usuario con el mismo email"];
+      }
+    }
+
 
     if (body.password) {
       const matchPassword = await comparePassword(
         body.password,
-        userFound.password,
+        userFound.password
       );
-
       if (!matchPassword) return [null, "La contraseña no coincide"];
     }
 
-    const dataUserUpdate = {
-      fullName: body.fullName,           
-      rut: body.rut,
-      email: body.email,
-      role: body.role,
-      paymentType: body.paymentType,
-      isActive: body.isActive,
-      isMinor: body.isMinor,
-      updatedAt: new Date(),
-    };
+    const dataUserUpdate = { ...body, updatedAt: new Date() };
 
     if (body.newPassword && body.newPassword.trim() !== "") {
       dataUserUpdate.password = await encryptPassword(body.newPassword);
+      delete dataUserUpdate.newPassword;
     }
 
     await userRepository.update({ id: userFound.id }, dataUserUpdate);
@@ -107,29 +100,72 @@ export async function updateUserService(query, body) {
   }
 }
 
-export async function deleteUserService(query) {
+export async function deactivateUserService({ id }) {
   try {
-    const { id, rut, email } = query;
-
     const userRepository = AppDataSource.getRepository(User);
 
     const userFound = await userRepository.findOne({
-      where: [{ id }, { rut }, { email }],
+      where: { id },
     });
 
     if (!userFound) return [null, "Usuario no encontrado"];
 
     if (userFound.role === "administrador") {
-      return [null, "No se puede eliminar un usuario con rol de administrador"];
+      return [null, "No se puede desactivar un usuario con rol de administrador"];
     }
 
-    const userDeleted = await userRepository.remove(userFound);
+    await userRepository.update(id, {
+      isActive: false,
+      updatedAt: new Date(),
+    });
 
-    const { password, ...dataUser } = userDeleted;
+    const userUpdated = await userRepository.findOne({
+      where: { id },
+    });
+
+    if (!userUpdated) {
+      return [null, "Usuario no encontrado después de desactivar"];
+    }
+
+    const { password, ...dataUser } = userUpdated;
 
     return [dataUser, null];
   } catch (error) {
-    console.error("Error al eliminar un usuario:", error);
+    console.error("Error al desactivar un usuario:", error);
+    return [null, "Error interno del servidor"];
+  }
+}
+
+export async function activateUserService({ id }) {
+  try {
+    const userRepository = AppDataSource.getRepository(User);
+
+    const userFound = await userRepository.findOne({
+      where: { id },
+    });
+
+    if (!userFound) return [null, "Usuario no encontrado"];
+
+    if (userFound.isActive) {
+      return [null, "El usuario ya está activo"];
+    }
+
+    await userRepository.update(id, {
+      isActive: true,
+      updatedAt: new Date(),
+    });
+
+    const userUpdated = await userRepository.findOne({ where: { id } });
+
+    if (!userUpdated) {
+      return [null, "Usuario no encontrado después de activar"];
+    }
+
+    const { password, ...dataUser } = userUpdated;
+
+    return [dataUser, null];
+  } catch (error) {
+    console.error("Error al activar un usuario:", error);
     return [null, "Error interno del servidor"];
   }
 }

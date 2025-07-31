@@ -110,3 +110,89 @@ export async function getUserAttendanceCounts(startDate, endDate) {
     return [null, "Error interno del servidor al obtener lista asistencia"];
   }
 }
+
+export async function getAttendancesByUserIdService({ id }) {
+  try {
+    const attendanceRepository = AppDataSource.getRepository("Attendance");
+
+    const attendances = await attendanceRepository.find({
+      where: { user: { id } },
+      relations: ["workday", "device", "user"],
+      order: {
+        createdAt: "DESC",
+      },
+    });
+
+    return [attendances, null];
+  } catch (error) {
+    console.error("Error al obtener asistencias del usuario:", error);
+    return [null, "Error interno del servidor"];
+  }
+}
+
+export async function createManualAttendanceService({ userId, date }) {
+  try {
+    const attendanceRepo = AppDataSource.getRepository("Attendance");
+    const workdayRepo = AppDataSource.getRepository("Workday");
+
+    const workday = await workdayRepo.findOne({ where: { date } });
+
+    if (!workday) {
+      return [null, "No existe un Workday para esa fecha"];
+    }
+
+    const existingAttendance = await attendanceRepo.findOne({
+      where: {
+        user: { id: userId },
+        workday: { id: workday.id },
+      },
+    });
+
+    if (existingAttendance) {
+      return [null, "La asistencia ya existe para ese usuario y día"];
+    }
+
+    const attendance = attendanceRepo.create({
+      user: { id: userId },
+      workday: { id: workday.id },
+    });
+
+    await attendanceRepo.save(attendance);
+
+    return [attendance, null];
+  } catch (error) {
+    console.error("Error al crear asistencia manual:", error);
+    return [null, "Error interno del servidor"];
+  }
+}
+
+export async function deleteManualAttendanceService({ userId, date }) {
+  try {
+    const attendanceRepo = AppDataSource.getRepository("Attendance");
+    const workdayRepo = AppDataSource.getRepository("Workday");
+
+    const workday = await workdayRepo.findOne({ where: { date } });
+
+    if (!workday) {
+      return [null, "No existe un Workday para esa fecha"];
+    }
+
+    const attendance = await attendanceRepo.findOne({
+      where: {
+        user: { id: userId },
+        workday: { id: workday.id },
+      },
+    });
+
+    if (!attendance) {
+      return [null, "No existe una asistencia para ese usuario en ese día"];
+    }
+
+    await attendanceRepo.remove(attendance);
+
+    return [attendance, null];
+  } catch (error) {
+    console.error("Error al eliminar asistencia manual:", error);
+    return [null, "Error interno del servidor"];
+  }
+}

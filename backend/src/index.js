@@ -8,12 +8,12 @@ import passport from "passport";
 import express, { json, urlencoded } from "express";
 import { cookieKey, HOST, PORT } from "./config/configEnv.js";
 import { connectDB } from "./config/config.Db.js";
-import { createUsers } from "./config/initialSetup.js";
+import { initialSetup } from "./config/initialSetup.js"; // <- CAMBIO AQUÍ
 import { passportJwtSetup } from "./auth/passport.auth.js";
 import {
   scheduleDailyWorkdayJob,
   runCreateTodayWorkdayOnStartup,
-} from "./jobs/createTodayWorkdayJob.js"
+} from "./jobs/createTodayWorkdayJob.js";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc.js";
 import timezone from "dayjs/plugin/timezone.js";
@@ -83,7 +83,7 @@ async function setupAPI() {
   try {
     await connectDB();
     await setupServer();
-    await createUsers();
+    await initialSetup(); // <- Y CAMBIO AQUÍ
     await runCreateTodayWorkdayOnStartup();
     scheduleDailyWorkdayJob();
     const todayDateOnly = dayjs().tz("America/Santiago").format("YYYY-MM-DD");
