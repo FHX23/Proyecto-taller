@@ -37,7 +37,7 @@ jobs:
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
           PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
           PAT_TOKEN: ${{ secrets.GIT_PAT_TOKEN }}
-          GITHUB_USER: tu-usuario-de-github # Reemplaza con tu usuario de GitHub
+          GITHUB_USER: FHX23 # Reemplaza con tu usuario de GitHub
         run: |
           sshpass -p "$SSH_PASSWORD" ssh \
             -o StrictHostKeyChecking=no \
