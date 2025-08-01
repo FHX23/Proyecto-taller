@@ -35,13 +35,13 @@ jobs:
           SSH_PORT: ${{ secrets.SSH_PORT }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          PROJECT_PATH: ${{ secrets.PROJECT_PATH }}
+          PAT_TOKEN: ${{ secrets.GIT_PAT_TOKEN }}
+          GITHUB_USER: tu-usuario-de-github # Reemplaza con tu usuario de GitHub
         run: |
-          # Define la ruta del proyecto aquí
-          PROJECT_PATH="/home/marenas/Proyecto-taller"
-          
           sshpass -p "$SSH_PASSWORD" ssh \
             -o StrictHostKeyChecking=no \
-            -p $SSH_PORT $SSH_USER@$SSH_HOST << EOF
+            -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
             
             set -euo pipefail
             
@@ -51,7 +51,8 @@ jobs:
             # --- Despliegue del Backend ---
             echo "Desplegando backend..."
             cd backend
-            git pull origin main
+            # Se usa el token PAT para autenticar el git pull
+            git pull https://$GITHUB_USER:$PAT_TOKEN@github.com/tu-usuario-de-github/nombre-de-tu-repo-backend.git main
             npm install
             echo "Reiniciando servicio pm2 del backend..."
             pm2 restart backend
@@ -59,7 +60,8 @@ jobs:
             # --- Despliegue del Frontend ---
             echo "Desplegando frontend..."
             cd ../frontend
-            git pull origin main
+            # Se usa el token PAT para autenticar el git pull
+            git pull https://$GITHUB_USER:$PAT_TOKEN@github.com/tu-usuario-de-github/nombre-de-tu-repo-frontend.git main
             npm install
             npm run build
             echo "Reiniciando servicio pm2 del frontend..."
