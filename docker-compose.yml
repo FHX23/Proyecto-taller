@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:17-alpine
+    container_name: qr-project-db
+    environment:
+      # Estas variables las tomará del archivo .env en la raíz
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${PASSWORD}
+      POSTGRES_DB: ${DATABASE}
+    ports:
+      # Mapea el puerto 5432 del contenedor al 5432 de tu servidor
+      # Solo si necesitas acceder a la BD desde fuera de Docker. Para producción, podrías quitarlo.
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - qr-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: qr-project-backend
+    environment:
+      # Variables para tu API de Node.js
+      NODE_ENV: production
+      PORT: 3000 # Puerto interno del contenedor
+      HOST: postgres # El hostname para conectar a la BD es el nombre del servicio!
+      DB_USERNAME: ${DB_USERNAME}
+      PASSWORD: ${PASSWORD}
+      DATABASE: ${DATABASE}
+      ACCESS_TOKEN_SECRET: ${ACCESS_TOKEN_SECRET}
+      cookieKey: ${cookieKey}
+      # No necesitas DATABASE_URL si defines las otras variables
+    depends_on:
+      postgres:
+        condition: service_healthy # Espera a que la BD esté lista
+    networks:
+      - qr-network
+    restart: unless-stopped
+    # No exponemos puertos (ports). El acceso será a través del proxy de Nginx (frontend). Es más seguro.
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: qr-project-frontend
+    ports:
+      # Mapea el puerto 80 del servidor al puerto 80 del contenedor Nginx
+      - "80:80"
+      # Si en el futuro quieres añadir HTTPS/SSL, mapearías también el 443
+      # - "443:443"
+    depends_on:
+      - backend
+    networks:
+      - qr-network
+    restart: unless-stopped
+
+networks:
+  qr-network:
+    driver: bridge
+
+volumes:
+  postgres_data: # Este volumen persiste los datos de tu BD aunque borres el contenedor
