@@ -1,0 +1,52 @@
+name: Despliegue en Servidor de Producción
+
+on:
+  push:
+    branches:
+      - main # Se ejecuta en cada push a la rama main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Instalar dependencias (SSH y sshpass)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openssh-client sshpass
+          
+      - name: Conexión SSH y Despliegue
+        timeout-minutes: 3
+        env:
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_PORT: ${{ secrets.SSH_PORT }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+          SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+          PROJECT_PATH: /home/marenas/Proyecto-taller
+        run: |
+          sshpass -p "$SSH_PASSWORD" ssh \
+            -o StrictHostKeyChecking=no \
+            -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
+            
+            set -euo pipefail
+            
+            # Ir al directorio base del proyecto en el servidor
+            cd $PROJECT_PATH
+            
+            # --- Despliegue del Backend ---
+            echo "Desplegando backend..."
+            cd backend
+            git pull origin main
+            npm install
+            echo "Reiniciando servicio pm2 del backend..."
+            pm2 restart backend
+            
+            # --- Despliegue del Frontend ---
+            echo "Desplegando frontend..."
+            cd ../frontend
+            git pull origin main
+            npm install
+            npm run build
+            echo "Reiniciando servicio pm2 del frontend..."
+            pm2 restart frontend
+            
+          EOF
