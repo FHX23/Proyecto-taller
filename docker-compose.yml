@@ -29,7 +29,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 80
-      HOST: localhost
+      HOST: postgres  # 👈 cambio importante
       DB_USERNAME: ${DB_USERNAME}
       PASSWORD: ${PASSWORD}
       DATABASE: ${DATABASE}
