@@ -21,7 +21,7 @@ jobs:
           SSH_PORT: ${{ secrets.SSH_PORT }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          PROJECT_PATH: /home/marenas/Proyecto_Taller
+          PROJECT_PATH: /home/marenas/Proyecto-taller
         run: |
           sshpass -p "$SSH_PASSWORD" ssh \
             -o StrictHostKeyChecking=no \
