@@ -31,7 +31,7 @@ jobs:
         if: always()
         run: rm -f /tmp/vpn-config.ovpn
           
-      - name: Conexión SSH y Despliegue (Lógica para un solo Repositorio)
+      - name: Conexión SSH y Despliegue Final
         timeout-minutes: 5 # Aumentamos un poco el tiempo por si las instalaciones tardan
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -49,13 +49,18 @@ jobs:
           
           # Si un comando falla, el script se detendrá
           set -euo pipefail
+
+          # --- Cargar NVM para que los comandos de node/npm estén disponibles ---
+          # Exportamos la variable de directorio de NVM
+          export NVM_DIR="\$HOME/.nvm"
+          # Cargamos el script de nvm.sh si existe (esta es la solución al 'npm command not found')
+          [ -s "\$NVM_DIR/nvm.sh" ] && \. "\$NVM_DIR/nvm.sh"
           
           echo "Navegando al directorio del proyecto: $PROJECT_PATH"
           cd "$PROJECT_PATH"
           
           echo "Actualizando el repositorio completo desde GitHub..."
           # Hacemos UN SOLO git pull para actualizar todo (backend y frontend)
-          # Esta forma es más segura porque el token no queda en el historial de comandos del servidor
           git remote set-url origin https://$GIT_PAT_TOKEN@github.com/$GITHUB_REPO.git
           git pull origin main
           
