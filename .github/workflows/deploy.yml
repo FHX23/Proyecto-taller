@@ -35,16 +35,18 @@ jobs:
           SSH_PORT: ${{ secrets.SSH_PORT }}
           SSH_USER: ${{ secrets.SSH_USER }}
           SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
-          PROJECT_PATH: /home/marenas/Proyecto-taller
         run: |
+          # Define la ruta del proyecto aquí
+          PROJECT_PATH="/home/marenas/Proyecto-taller"
+          
           sshpass -p "$SSH_PASSWORD" ssh \
             -o StrictHostKeyChecking=no \
-            -p $SSH_PORT $SSH_USER@$SSH_HOST << 'EOF'
+            -p $SSH_PORT $SSH_USER@$SSH_HOST << EOF
             
             set -euo pipefail
             
             # Ir al directorio base del proyecto en el servidor
-            cd $PROJECT_PATH
+            cd "$PROJECT_PATH"
             
             # --- Despliegue del Backend ---
             echo "Desplegando backend..."
