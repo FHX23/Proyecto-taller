@@ -1,4 +1,4 @@
-version: '3.8'
+# Contenido para tu archivo /home/ubuntu/Proyecto-taller/docker-compose.yml
 
 services:
   postgres:
@@ -8,8 +8,6 @@ services:
       - .env
     environment:
       LC_ALL: C.UTF-8
-    ports:
-      - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -29,10 +27,7 @@ services:
       HOST: postgres
     depends_on:
       postgres:
-        # CAMBIO: Se usa 'service_started' porque se eliminó el healthcheck
         condition: service_started
-    ports:
-      - "80:80"
     networks:
       - qr-network
     restart: unless-stopped
