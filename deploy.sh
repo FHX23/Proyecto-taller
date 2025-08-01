@@ -35,8 +35,8 @@ else
 fi
 
 # 2. CLONAR O ACTUALIZAR EL REPOSITORIO
-REPO_URL="URL_PUBLICA_DE_TU_REPOSITORIO_EN_GITHUB_AQUI"
-PROJECT_DIR="nombre-de-tu-repo"
+REPO_URL="https://github.com/FHX23/Proyecto-taller.git"
+PROJECT_DIR="Taller-desarollo"
 
 if [ -d "$PROJECT_DIR" ]; then
   echo "-> El directorio del proyecto ya existe. Actualizando desde Git..."
