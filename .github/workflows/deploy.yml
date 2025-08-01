@@ -9,10 +9,24 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Instalar dependencias (SSH y sshpass)
+      - name: Instalar dependencias (OpenVPN, SSH y sshpass)
         run: |
           sudo apt-get update
-          sudo apt-get install -y openssh-client sshpass
+          sudo apt-get install -y openssh-client sshpass openvpn openvpn-systemd-resolved
+          
+      - name: Crear archivo de configuración OpenVPN
+        run: echo "${{ secrets.OPENVPN_CONFIG }}" > /tmp/vpn-config.ovpn
+        
+      - name: Conexión a la VPN
+        uses: kota65535/github-openvpn-connect-action@v3.1.0
+        with:
+          config_file: /tmp/vpn-config.ovpn
+          username: ${{ secrets.OPENVPN_USERNAME }}
+          password: ${{ secrets.OPENVPN_PASSWORD }}
+          
+      - name: Eliminar archivo de configuración OpenVPN
+        if: always()
+        run: rm -f /tmp/vpn-config.ovpn
           
       - name: Conexión SSH y Despliegue
         timeout-minutes: 3
