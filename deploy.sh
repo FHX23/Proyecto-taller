@@ -38,15 +38,8 @@ fi
 REPO_URL="https://github.com/FHX23/Proyecto-taller.git"
 PROJECT_DIR="Taller-desarollo"
 
-if [ -d "$PROJECT_DIR" ]; then
-  echo "-> El directorio del proyecto ya existe. Actualizando desde Git..."
-  cd $PROJECT_DIR
-  git pull
-else
-  echo "-> Clonando el repositorio..."
-  git clone $REPO_URL
-  cd $PROJECT_DIR
-fi
+echo "-> Actualizando desde Git..."
+git pull
 
 # 3. CONFIGURAR EL ARCHIVO .env
 if [ ! -f ".env" ]; then
