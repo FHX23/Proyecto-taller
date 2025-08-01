@@ -11,7 +11,7 @@ const Landing = () => {
       <header className="flex items-center justify-center gap-2 p-8 lg:px-6">
         <ScanQrCode className="h-8 w-8" />
         <Link to="/" className="text-2xl font-bold text-green-500">
-          ScanWork
+          ScanWorks
         </Link>
       </header>
 
