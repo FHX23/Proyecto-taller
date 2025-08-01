@@ -1,4 +1,34 @@
-- name: Conexión SSH y Despliegue
+name: Despliegue en Servidor de Producción
+
+on:
+  push:
+    branches:
+      - main # Se ejecuta en cada push a la rama main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Instalar dependencias (OpenVPN, SSH y sshpass)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y openssh-client sshpass openvpn openvpn-systemd-resolved
+          
+      - name: Crear archivo de configuración OpenVPN
+        run: echo "${{ secrets.OPENVPN_CONFIG }}" > /tmp/vpn-config.ovpn
+        
+      - name: Conexión a la VPN
+        uses: kota65535/github-openvpn-connect-action@v3.1.0
+        with:
+          config_file: /tmp/vpn-config.ovpn
+          username: ${{ secrets.OPENVPN_USERNAME }}
+          password: ${{ secrets.OPENVPN_PASSWORD }}
+          
+      - name: Eliminar archivo de configuración OpenVPN
+        if: always()
+        run: rm -f /tmp/vpn-config.ovpn
+          
+      - name: Conexión SSH y Despliegue (CON DEPURACIÓN)
         timeout-minutes: 3
         env:
           SSH_HOST: ${{ secrets.SSH_HOST }}
@@ -12,30 +42,58 @@
           sshpass -p "$SSH_PASSWORD" ssh \
             -o StrictHostKeyChecking=no \
             -p $SSH_PORT $SSH_USER@$SSH_HOST << EOF
+          
+          # --- INICIO DE BLOQUE DE DEPURACIÓN ---
+          # El 'set -e' hace que el script falle si un comando falla. Lo desactivamos temporalmente para la depuración.
+          set +e 
 
-            set -euo pipefail
-            
-            echo "Navegando al directorio del proyecto: $PROJECT_PATH"
-            cd "$PROJECT_PATH"
-            
-            echo "Contenido del directorio actual:"
-            ls -la # <-- AÑADE ESTA LÍNEA PARA DEPURAR
-            
-            # --- Despliegue del Backend ---
-            echo "Desplegando backend..."
-            cd backend # El error ocurre aquí
-            
-            # ... el resto de tu script no cambia ...
-            git pull https://$GITHUB_USER:$PAT_TOKEN@github.com/tu-usuario-de-github/nombre-de-tu-repo-backend.git main
-            npm install
-            echo "Reiniciando servicio pm2 del backend..."
-            pm2 restart backend
-            
-            cd ../frontend
-            git pull https://$GITHUB_USER:$PAT_TOKEN@github.com/tu-usuario-de-github/nombre-de-tu-repo-frontend.git main
-            npm install
-            npm run build
-            echo "Reiniciando servicio pm2 del frontend..."
-            pm2 restart frontend
+          echo "------------------------------------------------------"
+          echo "INICIANDO DEPURACIÓN DEL DESPLIEGUE"
+          echo "------------------------------------------------------"
+          
+          echo "[DEBUG] Paso 1: Verificando la variable PROJECT_PATH recibida."
+          echo "[DEBUG] Valor de PROJECT_PATH: $PROJECT_PATH"
+          echo ""
 
+          echo "[DEBUG] Paso 2: Intentando navegar al directorio del proyecto."
+          cd "$PROJECT_PATH"
+          
+          echo "[DEBUG] Paso 3: Verificando el directorio de trabajo actual."
+          echo "[DEBUG] Estoy en la ruta:"
+          pwd
+          echo ""
+
+          echo "[DEBUG] Paso 4: Listando el contenido del directorio actual."
+          ls -la
+          echo ""
+          echo "------------------------------------------------------"
+          echo "FIN DE DEPURACIÓN. CONTINUANDO CON EL SCRIPT..."
+          echo "------------------------------------------------------"
+          
+          # Reactivamos la salida en caso de error para el resto del script
+          set -e
+          # --- FIN DE BLOQUE DE DEPURACIÓN ---
+          
+          # Ir al directorio base del proyecto en el servidor (ya lo hicimos, pero lo dejamos por consistencia)
+          cd "$PROJECT_PATH"
+          
+          # --- Despliegue del Backend ---
+          echo "Desplegando backend..."
+          cd backend
+          # Se usa el token PAT para autenticar el git pull
+          git pull https://$GITHUB_USER:$PAT_TOKEN@github.com/tu-usuario-de-github/nombre-de-tu-repo-backend.git main
+          npm install
+          echo "Reiniciando servicio pm2 del backend..."
+          pm2 restart backend
+          
+          # --- Despliegue del Frontend ---
+          echo "Desplegando frontend..."
+          cd ../frontend
+          # Se usa el token PAT para autenticar el git pull
+          git pull https://$GITHUB_USER:$PAT_TOKEN@github.com/tu-usuario-de-github/nombre-de-tu-repo-frontend.git main
+          npm install
+          npm run build
+          echo "Reiniciando servicio pm2 del frontend..."
+          pm2 restart frontend
+          
           EOF
